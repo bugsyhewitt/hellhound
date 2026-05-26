@@ -1,0 +1,200 @@
+# hellhound default fingerprint set
+#
+# Each entry recognises a class of internet-connected device from its
+# HTTP/HTTPS surface and lists the factory-default credentials that ship with
+# it. hellhound is detection-only: it reports devices that still accept these
+# defaults so the owner can rotate them. See README.md for the field schema
+# and the ethical-use notice.
+#
+# Severity reflects the exposure of a default-credential finding for that
+# device class, not a CVE score.
+
+fingerprints:
+  - id: hikvision-dvr
+    vendor: Hikvision
+    model_class: DVR / NVR / IP Camera
+    severity: critical
+    description: Hikvision recorders and cameras shipped with admin/12345.
+    match:
+      path: /
+      http_title: Hikvision
+    default_credentials:
+      - {username: admin, password: "12345"}
+    auth:
+      type: basic
+      path: /ISAPI/Security/userCheck
+
+  - id: dahua-dvr
+    vendor: Dahua
+    model_class: DVR / NVR / IP Camera
+    severity: critical
+    description: Dahua recorders default to admin/admin web login.
+    match:
+      path: /
+      body_contains: "RPC2_Login"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /RPC2_Login
+      method: POST
+      username_field: userName
+      password_field: password
+      success_status: [200]
+      failure_body_contains: "error"
+
+  - id: generic-cctv-admin
+    vendor: Generic
+    model_class: CCTV / Webcam admin panel
+    severity: high
+    description: Generic IP-camera web admin panels using admin/admin.
+    match:
+      path: /
+      http_title: "Web Service"
+      body_contains: "login"
+    default_credentials:
+      - {username: admin, password: admin}
+      - {username: admin, password: ""}
+    auth:
+      type: form
+      path: /login.cgi
+      username_field: user
+      password_field: pwd
+
+  - id: mikrotik-routeros
+    vendor: MikroTik
+    model_class: RouterOS router / switch
+    severity: high
+    description: MikroTik RouterOS Webfig ships with admin and a blank password.
+    match:
+      path: /
+      http_title: RouterOS
+    default_credentials:
+      - {username: admin, password: ""}
+    auth:
+      type: form
+      path: /jsproxy
+      username_field: name
+      password_field: password
+
+  - id: ubiquiti-airos
+    vendor: Ubiquiti
+    model_class: airOS radio / AP
+    severity: high
+    description: Ubiquiti airOS devices default to ubnt/ubnt.
+    match:
+      path: /
+      body_contains: "airos"
+    default_credentials:
+      - {username: ubnt, password: ubnt}
+    auth:
+      type: form
+      path: /login.cgi
+      username_field: username
+      password_field: password
+
+  - id: axis-camera
+    vendor: Axis
+    model_class: Network camera
+    severity: high
+    description: Axis network cameras with the legacy root/pass default.
+    match:
+      path: /
+      http_title: "AXIS"
+    default_credentials:
+      - {username: root, password: pass}
+    auth:
+      type: basic
+      path: /axis-cgi/admin/param.cgi?action=list
+
+  - id: dlink-router
+    vendor: D-Link
+    model_class: SOHO router
+    severity: medium
+    description: D-Link routers commonly ship with admin and a blank password.
+    match:
+      path: /
+      http_title: D-Link
+    default_credentials:
+      - {username: admin, password: ""}
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login.cgi
+      username_field: username
+      password_field: password
+
+  - id: netgear-router
+    vendor: NETGEAR
+    model_class: SOHO router
+    severity: medium
+    description: NETGEAR routers default to admin/password over HTTP Basic.
+    match:
+      path: /
+      header_contains:
+        www-authenticate: NETGEAR
+    default_credentials:
+      - {username: admin, password: password}
+    auth:
+      type: basic
+      path: /
+
+  - id: tplink-router
+    vendor: TP-Link
+    model_class: SOHO router
+    severity: medium
+    description: TP-Link routers default to admin/admin.
+    match:
+      path: /
+      http_title: TP-LINK
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: basic
+      path: /
+
+  - id: foscam-camera
+    vendor: Foscam
+    model_class: Network camera
+    severity: high
+    description: Foscam cameras default to admin with a blank password.
+    match:
+      path: /
+      body_contains: "/cgi-bin/CGIProxy.fcgi"
+    default_credentials:
+      - {username: admin, password: ""}
+    auth:
+      type: form
+      path: /cgi-bin/CGIProxy.fcgi
+      username_field: usr
+      password_field: pwd
+
+  - id: zyxel-router
+    vendor: ZyXEL
+    model_class: SOHO router / gateway
+    severity: medium
+    description: ZyXEL gateways default to admin/1234.
+    match:
+      path: /
+      http_title: ZyXEL
+    default_credentials:
+      - {username: admin, password: "1234"}
+    auth:
+      type: form
+      path: /cgi-bin/login.cgi
+      username_field: username
+      password_field: password
+
+  - id: avtech-dvr
+    vendor: AVTECH
+    model_class: DVR / IP Camera
+    severity: high
+    description: AVTECH DVRs and cameras default to admin/admin.
+    match:
+      path: /
+      body_contains: "/cgi-bin/nobody/Machine.cgi"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: basic
+      path: /cgi-bin/nobody/Machine.cgi?action=get_capability
