@@ -198,3 +198,192 @@ fingerprints:
     auth:
       type: basic
       path: /cgi-bin/nobody/Machine.cgi?action=get_capability
+
+  # --- Phase 2 expansion: device classes actively targeted by 2025-2026
+  # botnets (Mirai variants, Nexcorium, Aisuru). Default-creds verified from
+  # POST_V01.md research. ---
+
+  - id: reolink-camera
+    vendor: Reolink
+    model_class: Network camera
+    severity: high
+    description: Reolink IP cameras ship with admin and a blank password.
+    match:
+      path: /
+      body_contains: "reolink"
+    default_credentials:
+      - {username: admin, password: ""}
+    auth:
+      type: form
+      path: /cgi-bin/api.cgi?cmd=Login
+      username_field: userName
+      password_field: password
+
+  - id: grandstream-device
+    vendor: Grandstream
+    model_class: IP phone / access point
+    severity: high
+    description: Grandstream GXP phones and GWN access points default to admin/admin.
+    match:
+      path: /
+      body_contains: "Grandstream"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /cgi-bin/dologin.cgi
+      username_field: username
+      password_field: password
+
+  - id: aruba-instant-on
+    vendor: HPE Aruba
+    model_class: Enterprise access point
+    severity: critical
+    description: >-
+      HPE Aruba Instant On access points (firmware <= 3.2.0.1) ship with a
+      hardcoded admin/default123 backdoor (CVE-2025-37103).
+    match:
+      path: /
+      body_contains: "Instant On"
+    default_credentials:
+      - {username: admin, password: default123}
+    auth:
+      type: basic
+      path: /api/v1/login
+
+  - id: tenda-router
+    vendor: Tenda
+    model_class: SOHO router
+    severity: medium
+    description: Tenda A, AC, and F series routers default to admin/admin.
+    match:
+      path: /
+      http_title: Tenda
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login/Auth
+      username_field: username
+      password_field: password
+
+  - id: amcrest-nvr
+    vendor: Amcrest
+    model_class: NVR / DVR
+    severity: high
+    description: Amcrest NVRs and DVRs default to admin/admin.
+    match:
+      path: /
+      http_title: Amcrest
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: basic
+      path: /cgi-bin/magicBox.cgi?action=getDeviceType
+
+  - id: vivotek-camera
+    vendor: Vivotek
+    model_class: Network camera
+    severity: high
+    description: Vivotek network cameras ship with root and a blank password.
+    match:
+      path: /
+      http_title: VIVOTEK
+    default_credentials:
+      - {username: root, password: ""}
+    auth:
+      type: basic
+      path: /cgi-bin/viewer/video.jpg
+
+  - id: axis-camera-gen2
+    vendor: Axis
+    model_class: Network camera
+    severity: high
+    description: >-
+      Second-generation Axis cameras (before password enforcement) shipped with
+      root/root. Supplemental to the legacy axis-camera entry.
+    match:
+      path: /
+      body_contains: "AXIS"
+    default_credentials:
+      - {username: root, password: root}
+    auth:
+      type: basic
+      path: /axis-cgi/admin/param.cgi?action=list
+
+  - id: linksys-wrt
+    vendor: Linksys
+    model_class: SOHO router
+    severity: medium
+    description: Linksys WRT routers default to admin/admin over HTTP Basic.
+    match:
+      path: /
+      header_contains:
+        www-authenticate: Linksys
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: basic
+      path: /
+
+  - id: asus-router
+    vendor: ASUS
+    model_class: SOHO router
+    severity: medium
+    description: ASUS routers default to admin/admin.
+    match:
+      path: /
+      http_title: ASUS
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login.cgi
+      username_field: login_username
+      password_field: login_passwd
+
+  - id: moxa-nport
+    vendor: Moxa
+    model_class: Industrial serial device server
+    severity: high
+    description: Moxa NPort serial servers ship with admin and a blank password.
+    match:
+      path: /
+      http_title: Moxa NPort
+    default_credentials:
+      - {username: admin, password: ""}
+    auth:
+      type: basic
+      path: /cgi-bin/mainpage.cgi
+
+  - id: geovision-dvr
+    vendor: GeoVision
+    model_class: Smart DVR
+    severity: high
+    description: >-
+      GeoVision DVRs default to admin/admin and are actively targeted by Mirai
+      via CVE-2024-6047 / CVE-2024-11120.
+    match:
+      path: /
+      http_title: GeoVision
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: basic
+      path: /
+
+  - id: netgear-orbi
+    vendor: NETGEAR
+    model_class: Mesh router (Orbi)
+    severity: medium
+    description: >-
+      NETGEAR Orbi mesh systems default to admin/password. Supplements the
+      generic netgear-router entry with an Orbi-specific match.
+    match:
+      path: /
+      http_title: Orbi
+    default_credentials:
+      - {username: admin, password: password}
+    auth:
+      type: basic
+      path: /

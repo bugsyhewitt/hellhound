@@ -119,9 +119,14 @@ still accepts the listed default credentials and should be reconfigured.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 12 well-known IoT device classes (Hikvision, Dahua, MikroTik RouterOS,
-Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL, AVTECH, and a generic
-CCTV admin panel).
+with 24 IoT device classes. The original Mirai-era set covers Hikvision, Dahua,
+MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
+AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
+actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
+Axis cameras, Grandstream phones/APs, HPE Aruba Instant On APs
+(CVE-2025-37103), Tenda, ASUS, Linksys WRT and NETGEAR Orbi routers, Amcrest
+NVRs, Moxa NPort serial servers, and GeoVision DVRs
+(CVE-2024-6047 / CVE-2024-11120).
 
 Each file has a top-level `fingerprints` list. An entry:
 

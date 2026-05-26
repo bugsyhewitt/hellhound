@@ -8,7 +8,12 @@ lap; Workers implement exactly one improvement per lap.
 
 ## Ranked improvement list
 
-### 1. Expand the fingerprint database — 10+ high-value new entries (PRIORITY)
+### 1. Expand the fingerprint database — 10+ high-value new entries (PRIORITY) — ✅ IMPLEMENTED (Phase 2, Rotation 2)
+
+**Status:** Done. All 12 new fingerprints below were added to
+`hellhound/fingerprints/default.yaml` (database now 24 entries), each with a
+mock-transport unit test in `tests/test_fingerprints_phase2.py` proving
+fingerprint match and default-credential detection. No engine changes.
 
 **Why first:** The fingerprint database is the core product. v0.1 shipped 12
 entries covering the classic Mirai-era targets (Hikvision, Dahua, MikroTik,
