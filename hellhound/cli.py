@@ -118,6 +118,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Maximum concurrent requests (default: 50).",
     )
     parser.add_argument(
+        "--exclude",
+        "-e",
+        action="append",
+        default=[],
+        metavar="CIDR|IP",
+        help="Exclude a CIDR range or single IP from scanning. "
+        "Repeat to exclude multiple ranges (e.g. --exclude 10.0.0.0/8 --exclude 172.16.0.0/12).",
+    )
+    parser.add_argument(
+        "--exclude-file",
+        metavar="PATH",
+        default=None,
+        help="Path to a file of CIDR/IP exclusions, one per line. "
+        "Lines starting with '#' and blank lines are ignored.",
+    )
+    parser.add_argument(
         "--version",
         action="version",
         version=f"hellhound {__version__}",
@@ -210,13 +226,22 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: unknown fingerprint set: {exc}", file=sys.stderr)
         return 2
 
+    try:
+        exclusions = Scanner.parse_exclusions(
+            exclude=args.exclude or [],
+            exclude_file=args.exclude_file,
+        )
+    except (ValueError, OSError) as exc:
+        print(f"error: invalid exclusion: {exc}", file=sys.stderr)
+        return 2
+
     scanner = Scanner(
         fingerprints=fingerprints,
         timeout=args.timeout,
         concurrency=args.concurrency,
     )
 
-    findings = asyncio.run(scanner.scan(args.target, ports))
+    findings = asyncio.run(scanner.scan(args.target, ports, exclusions=exclusions))
 
     if args.output_file is None:
         # stdout: csv module wants newline="" but sys.stdout is already managed;

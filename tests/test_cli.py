@@ -170,7 +170,7 @@ def test_main_csv_output_file_round_trip(monkeypatch, capsys, tmp_path):
     """--format csv --output-file writes a CSV file; stdout stays empty."""
     findings = _mixed_findings()
 
-    async def fake_scan(self, targets, ports):
+    async def fake_scan(self, targets, ports, **kwargs):
         return findings
 
     monkeypatch.setattr("hellhound.scanner.Scanner.scan", fake_scan)
@@ -202,7 +202,7 @@ def test_main_csv_output_file_round_trip(monkeypatch, capsys, tmp_path):
 def test_main_json_output_file_round_trip(monkeypatch, capsys, tmp_path):
     findings = _sample_findings()
 
-    async def fake_scan(self, targets, ports):
+    async def fake_scan(self, targets, ports, **kwargs):
         return findings
 
     monkeypatch.setattr("hellhound.scanner.Scanner.scan", fake_scan)
@@ -221,7 +221,7 @@ def test_main_csv_to_stdout(monkeypatch, capsys):
     """Without --output-file, csv goes to stdout."""
     findings = _sample_findings()
 
-    async def fake_scan(self, targets, ports):
+    async def fake_scan(self, targets, ports, **kwargs):
         return findings
 
     monkeypatch.setattr("hellhound.scanner.Scanner.scan", fake_scan)
@@ -237,7 +237,7 @@ def test_main_csv_to_stdout(monkeypatch, capsys):
 def test_main_output_file_unwritable_errors(monkeypatch, capsys):
     findings = _sample_findings()
 
-    async def fake_scan(self, targets, ports):
+    async def fake_scan(self, targets, ports, **kwargs):
         return findings
 
     monkeypatch.setattr("hellhound.scanner.Scanner.scan", fake_scan)
@@ -255,7 +255,7 @@ def test_main_runs_against_mock(monkeypatch, capsys):
     """End-to-end CLI path with the scan engine stubbed out."""
     findings = _sample_findings()
 
-    async def fake_scan(self, targets, ports):
+    async def fake_scan(self, targets, ports, **kwargs):
         return findings
 
     monkeypatch.setattr("hellhound.scanner.Scanner.scan", fake_scan)

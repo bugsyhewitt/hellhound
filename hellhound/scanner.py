@@ -85,6 +85,49 @@ class Scanner:
         self._verify_tls = verify_tls
         self._semaphore = asyncio.Semaphore(concurrency)
 
+    # ------------------------------------------------------------------ exclusions
+
+    @staticmethod
+    def parse_exclusions(
+        exclude: list[str] | None = None,
+        exclude_file: str | None = None,
+    ) -> list[ipaddress.IPv4Network | ipaddress.IPv6Network]:
+        """Parse ``--exclude`` entries and/or an ``--exclude-file`` into networks.
+
+        Each entry may be a single IP (e.g. ``10.0.0.5``) or a CIDR
+        (e.g. ``10.0.0.0/8``).  Lines in ``exclude_file`` beginning with ``#``
+        and blank lines are ignored.
+        """
+        raw: list[str] = list(exclude or [])
+
+        if exclude_file:
+            with open(exclude_file, encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    raw.append(line)
+
+        networks: list[ipaddress.IPv4Network | ipaddress.IPv6Network] = []
+        for entry in raw:
+            networks.append(ipaddress.ip_network(entry, strict=False))
+        return networks
+
+    @staticmethod
+    def is_excluded(
+        host: str,
+        exclusions: list[ipaddress.IPv4Network | ipaddress.IPv6Network],
+    ) -> bool:
+        """Return True if *host* (a string IP address) falls within any exclusion network."""
+        if not exclusions:
+            return False
+        try:
+            addr = ipaddress.ip_address(host)
+        except ValueError:
+            # bare hostname — cannot match a CIDR exclusion; don't exclude it
+            return False
+        return any(addr in net for net in exclusions)
+
     # ------------------------------------------------------------------ targets
     @staticmethod
     def expand_targets(targets: list[str]) -> list[str]:
@@ -117,9 +160,21 @@ class Scanner:
         return ordered
 
     # ------------------------------------------------------------------ scanning
-    async def scan(self, targets: list[str], ports: list[int]) -> list[Finding]:
-        """Scan all targets across all ports concurrently."""
+    async def scan(
+        self,
+        targets: list[str],
+        ports: list[int],
+        exclusions: list[ipaddress.IPv4Network | ipaddress.IPv6Network] | None = None,
+    ) -> list[Finding]:
+        """Scan all targets across all ports concurrently.
+
+        *exclusions* is an optional list of networks (built by
+        :meth:`parse_exclusions`) whose hosts are silently skipped after target
+        expansion.
+        """
         hosts = self.expand_targets(targets)
+        if exclusions:
+            hosts = [h for h in hosts if not self.is_excluded(h, exclusions)]
         async with self._client() as client:
             tasks = [self._scan_host(client, host, ports) for host in hosts]
             results = await asyncio.gather(*tasks)

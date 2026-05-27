@@ -83,6 +83,8 @@ Key options:
 | `--output-file`, `-o` | Write output to this path instead of stdout. | *(stdout)* |
 | `--timeout` | Per-request timeout (seconds). | `5.0` |
 | `--concurrency` | Max concurrent requests. | `50` |
+| `--exclude`, `-e` | Exclude a CIDR or IP from scanning. Repeatable. | *(none)* |
+| `--exclude-file` | Path to a file of CIDR/IP exclusions (one per line, `#` comments). | *(none)* |
 
 ### Output
 
@@ -114,6 +116,42 @@ JSON output groups a summary with per-device findings:
 
 A finding with `"default_creds": true` is the actionable result: that device
 still accepts the listed default credentials and should be reconfigured.
+
+### Exclusions
+
+Use `--exclude` and/or `--exclude-file` to skip known-safe or out-of-scope
+hosts after target expansion. Exclusions are applied before any scanning takes
+place so no network traffic is sent to excluded addresses.
+
+Exclude a single IP or a CIDR range with a repeatable flag:
+
+```bash
+hellhound --target 192.0.2.0/24 --exclude 192.0.2.1 --exclude 192.0.2.100/30
+```
+
+For larger exclusion lists, put them in a file (one entry per line; lines
+starting with `#` and blank lines are ignored):
+
+```
+# known management hosts — do not scan
+10.0.0.1
+10.0.0.2/30
+
+# out-of-scope subnet
+172.16.0.0/12
+```
+
+```bash
+hellhound --target 10.0.0.0/8 --exclude-file ./out-of-scope.txt
+```
+
+Both flags can be combined:
+
+```bash
+hellhound --target 192.168.0.0/16 \
+  --exclude 192.168.1.1 \
+  --exclude-file corporate-exclusions.txt
+```
 
 #### CSV output and writing to a file
 
