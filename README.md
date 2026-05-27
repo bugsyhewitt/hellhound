@@ -79,7 +79,8 @@ Key options:
 | `--target`, `-t` | CIDR range or single IP/host. Repeat for multiple targets. | *(required)* |
 | `--ports`, `-p` | Comma-separated ports to probe. | `80,443,8080,8443` |
 | `--fingerprint-set`, `-f` | Name of the fingerprint set under `hellhound/fingerprints/`. | `default` |
-| `--format` | `json` or `text`. | `json` |
+| `--format` | `json`, `text`, or `csv`. | `json` |
+| `--output-file`, `-o` | Write output to this path instead of stdout. | *(stdout)* |
 | `--timeout` | Per-request timeout (seconds). | `5.0` |
 | `--concurrency` | Max concurrent requests. | `50` |
 
@@ -113,6 +114,31 @@ JSON output groups a summary with per-device findings:
 
 A finding with `"default_creds": true` is the actionable result: that device
 still accepts the listed default credentials and should be reconfigured.
+
+#### CSV output and writing to a file
+
+For a CIDR sweep you usually want a persistent artefact you can open in a
+spreadsheet or import into a SIEM. Use `--format csv` together with
+`--output-file` (`-o`):
+
+```bash
+hellhound --target 192.0.2.0/24 --format csv --output-file sweep.csv
+```
+
+When `--output-file` is given, nothing is printed to stdout — the output goes
+to the file. `--output-file` works with any format (`json`, `text`, or `csv`).
+
+The CSV has a header row followed by one row per matched device. Columns:
+
+```csv
+host,port,scheme,vendor,model_class,severity,fingerprint_id,default_creds,username,password,evidence
+192.0.2.10,80,http,Hikvision,DVR / NVR / IP Camera,critical,hikvision-dvr,true,admin,12345,matched Hikvision via title/body; default creds admin:12345 authenticated at /ISAPI/Security/userCheck
+192.0.2.11,443,https,Dahua,NVR,high,dahua-nvr,false,,,matched Dahua fingerprint; default credentials rejected
+```
+
+`default_creds` is `true`/`false`. For devices whose default credentials were
+rejected (`default_creds` is `false`), the `username` and `password` cells are
+empty.
 
 ---
 
@@ -177,7 +203,8 @@ Add a new device by appending an entry. Load an alternate set with
 ## Scope (v0.1)
 
 In scope: HTTP/HTTPS fingerprinting and default-credential checking over a CIDR
-range or single host, JSON/text output, a YAML fingerprint database.
+range or single host, JSON/text/CSV output (to stdout or a file), a YAML
+fingerprint database.
 
 Deliberately **out of scope** for v0.1: Telnet/SSH scanning, brute-forcing
 non-default credentials, any active exploitation, Shodan integration, and a web
