@@ -211,7 +211,7 @@ def test_cli_main_exclude_filters_target(monkeypatch, capsys):
     """CLI: excluded host is not in the scan targets passed to Scanner.scan."""
     captured_targets: list[list[str]] = []
 
-    async def fake_scan(self, targets, ports, exclusions=None):
+    async def fake_scan(self, targets, ports, exclusions=None, progress_callback=None):
         # apply exclusions the same way the real scan() does
         hosts = Scanner.expand_targets(targets)
         if exclusions:
@@ -237,7 +237,7 @@ def test_cli_main_exclude_file(monkeypatch, capsys, tmp_path):
 
     captured_targets: list[list[str]] = []
 
-    async def fake_scan(self, targets, ports, exclusions=None):
+    async def fake_scan(self, targets, ports, exclusions=None, progress_callback=None):
         hosts = Scanner.expand_targets(targets)
         if exclusions:
             hosts = [h for h in hosts if not Scanner.is_excluded(h, exclusions)]

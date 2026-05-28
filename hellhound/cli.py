@@ -19,7 +19,7 @@ from typing import TextIO
 
 from . import __version__
 from .fingerprint import load_fingerprint_set_with_dir
-from .scanner import Finding, Scanner
+from .scanner import Finding, Scanner, ScanProgress
 
 DEFAULT_PORTS = "80,443,8080,8443"
 
@@ -172,6 +172,23 @@ def build_parser() -> argparse.ArgumentParser:
         help="Digest mode: report only findings with confirmed default "
         "credentials. Suppresses matched-but-rotated findings to cut noise "
         "on large sweeps. Summary counts still reflect all matches.",
+    )
+    progress_group = parser.add_mutually_exclusive_group()
+    progress_group.add_argument(
+        "--progress",
+        action="store_true",
+        default=None,
+        help="Emit a live progress line to stderr (hosts scanned / total, "
+        "findings so far) during the scan. Default: on when stderr is a TTY, "
+        "off when redirected or piped. stdout output is never affected.",
+    )
+    progress_group.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        default=False,
+        help="Suppress all stderr output including the progress line. Mutually "
+        "exclusive with --progress.",
     )
     parser.add_argument(
         "--version",
@@ -369,6 +386,48 @@ def format_output(
     return None
 
 
+def resolve_progress_enabled(
+    progress_flag: bool | None, quiet: bool, stream: TextIO | None = None
+) -> bool:
+    """Decide whether to emit the progress line.
+
+    ``--quiet`` always wins (no stderr at all). An explicit ``--progress``
+    forces it on. With neither flag set (``progress_flag is None``), progress
+    auto-enables only when *stream* (stderr) is an interactive TTY, so piped or
+    redirected runs stay silent and machine-friendly.
+    """
+    if quiet:
+        return False
+    if progress_flag:
+        return True
+    stream = stream if stream is not None else sys.stderr
+    isatty = getattr(stream, "isatty", None)
+    return bool(isatty()) if callable(isatty) else False
+
+
+def make_progress_callback(stream: TextIO | None = None):
+    """Build a callback that writes a single rewriting progress line to *stream*.
+
+    The line is carriage-return prefixed so each update overwrites the previous
+    one in a terminal, keeping the scan to one tidy status line. It writes to
+    stderr by default so stdout stays a clean machine-readable stream.
+    """
+    out = stream if stream is not None else sys.stderr
+
+    def callback(progress: ScanProgress) -> None:
+        line = (
+            f"\rhellhound: {progress.hosts_done}/{progress.hosts_total} hosts "
+            f"scanned, {progress.findings_with_default_creds} with default creds"
+        )
+        out.write(line)
+        if progress.hosts_done >= progress.hosts_total:
+            # finish the line so it doesn't get clobbered by the final output
+            out.write("\n")
+        out.flush()
+
+    return callback
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -405,7 +464,18 @@ def main(argv: list[str] | None = None) -> int:
         rate_limit=args.rate_limit,
     )
 
-    findings = asyncio.run(scanner.scan(args.target, ports, exclusions=exclusions))
+    progress_callback = None
+    if resolve_progress_enabled(args.progress, args.quiet):
+        progress_callback = make_progress_callback()
+
+    findings = asyncio.run(
+        scanner.scan(
+            args.target,
+            ports,
+            exclusions=exclusions,
+            progress_callback=progress_callback,
+        )
+    )
 
     if args.output_file is None:
         # stdout: csv module wants newline="" but sys.stdout is already managed;

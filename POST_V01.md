@@ -221,7 +221,22 @@ private sets and easy community contribution.
 
 ---
 
-### 10. Async progress reporting (`--progress` flag / `--quiet` flag)
+### 10. Async progress reporting (`--progress` flag / `--quiet` flag) — ✅ IMPLEMENTED (Phase 2, Rotation 11)
+
+**Status:** Done. Added `--progress` and `--quiet` (mutually exclusive) flags to
+the CLI. `Scanner.scan` gained an optional `progress_callback` that fires once
+per completed host with a new `ScanProgress` snapshot (`hosts_done`,
+`hosts_total` after exclusions, running `findings_with_default_creds`), keeping
+the engine decoupled from any output concern. `cli.resolve_progress_enabled`
+decides emission — `--quiet` wins, `--progress` forces on, otherwise it
+auto-enables only when stderr is a TTY — and `cli.make_progress_callback` writes
+a single carriage-return-rewritten status line to stderr (terminated on the
+final host) so stdout stays a clean JSON/CSV/SARIF stream. 13 unit tests in
+`tests/test_progress.py` (per-host callback firing, flagged-count semantics,
+exclusion-aware totals, enablement decision matrix, line rendering, CLI parsing
+and mutual exclusion, and end-to-end stderr capture for both `--progress` and
+`--quiet`) using httpx.MockTransport — no network, no Docker. README documents
+the flags and adds a Progress output section.
 
 **Why tenth:** When scanning a /16 or /24 range, hellhound prints nothing until
 all results are ready. Operators have no feedback that the scan is running.

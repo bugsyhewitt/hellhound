@@ -67,6 +67,21 @@ class Finding:
         return data
 
 
+@dataclass
+class ScanProgress:
+    """A snapshot of scan progress, passed to a progress callback per host.
+
+    Reported after each host finishes so a caller can render a live status line
+    (e.g. to stderr) during a long CIDR sweep. ``hosts_done`` counts hosts whose
+    scan has completed, ``hosts_total`` is the post-exclusion host count, and
+    ``findings_with_default_creds`` is the running tally of confirmed exposures.
+    """
+
+    hosts_done: int
+    hosts_total: int
+    findings_with_default_creds: int
+
+
 class Scanner:
     """Async scanner over a set of fingerprints.
 
@@ -193,18 +208,46 @@ class Scanner:
         targets: list[str],
         ports: list[int],
         exclusions: list[ipaddress.IPv4Network | ipaddress.IPv6Network] | None = None,
+        progress_callback: Callable[[ScanProgress], None] | None = None,
     ) -> list[Finding]:
         """Scan all targets across all ports concurrently.
 
         *exclusions* is an optional list of networks (built by
         :meth:`parse_exclusions`) whose hosts are silently skipped after target
         expansion.
+
+        *progress_callback*, when supplied, is invoked once per completed host
+        with a :class:`ScanProgress` snapshot (hosts done, total hosts, and the
+        running count of confirmed default-credential findings). It lets a caller
+        emit a live progress line during long sweeps without the scanner needing
+        to know about stderr or any output format. The callback runs on the
+        event loop between host completions; it must be cheap and non-blocking.
         """
         hosts = self.expand_targets(targets)
         if exclusions:
             hosts = [h for h in hosts if not self.is_excluded(h, exclusions)]
+
+        total = len(hosts)
+        done = 0
+        flagged = 0
+
+        async def run_host(host: str) -> list[Finding]:
+            nonlocal done, flagged
+            host_findings = await self._scan_host(client, host, ports)
+            done += 1
+            flagged += sum(1 for f in host_findings if f.default_creds)
+            if progress_callback is not None:
+                progress_callback(
+                    ScanProgress(
+                        hosts_done=done,
+                        hosts_total=total,
+                        findings_with_default_creds=flagged,
+                    )
+                )
+            return host_findings
+
         async with self._client() as client:
-            tasks = [self._scan_host(client, host, ports) for host in hosts]
+            tasks = [run_host(host) for host in hosts]
             results = await asyncio.gather(*tasks)
         return [finding for host_findings in results for finding in host_findings]
 
