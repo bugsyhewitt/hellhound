@@ -76,10 +76,11 @@ Key options:
 
 | Flag | Description | Default |
 |---|---|---|
-| `--target`, `-t` | CIDR range or single IP/host. Repeat for multiple targets. | *(required)* |
+| `--target`, `-t` | CIDR range or single IP/host. Repeat for multiple targets. | *(required unless `--list-fingerprints`)* |
 | `--ports`, `-p` | Comma-separated ports to probe. | `80,443,8080,8443` |
 | `--fingerprint-set`, `-f` | Name of the fingerprint set under `hellhound/fingerprints/`. | `default` |
 | `--fingerprint-dir` | Directory holding a custom `<set>.yaml`. Custom entries override bundled ones by `id`; the rest are appended. | *(none)* |
+| `--list-fingerprints` | Inventory mode: print the loaded fingerprint database (after any `--fingerprint-dir` merge) and exit without scanning. Honours `--format` and `--output-file`; no target required. | *(off)* |
 | `--format` | `json`, `text`, `csv`, or `sarif`. | `json` |
 | `--output-file`, `-o` | Write output to this path instead of stdout. | *(stdout)* |
 | `--timeout` | Per-request timeout (seconds). | `5.0` |
@@ -114,6 +115,47 @@ hellhound --target 10.0.0.0/24 --progress --output-file findings.json
 
 # fully silent on stderr (e.g. inside a cron job)
 hellhound --target 10.0.0.0/24 --quiet > findings.json
+```
+
+### Listing the fingerprint database
+
+Before a scan, you often want to know *what hellhound can detect* — which device
+classes, vendors, severities and CVEs the loaded set covers. `--list-fingerprints`
+prints the database and exits without touching the network. No `--target` is
+required.
+
+```bash
+# human-readable inventory
+hellhound --list-fingerprints --format text
+```
+
+```
+hellhound: 24 fingerprint(s) loaded
+[CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
+  default creds: admin:12345
+[CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
+  default creds: admin:admin
+...
+```
+
+It honours `--format` (`json`, `text`, `csv`; `sarif` falls back to `json`) and
+`--output-file`, so you can pipe the inventory into a spreadsheet or a coverage
+report:
+
+```bash
+# machine-readable coverage audit
+hellhound --list-fingerprints --format json
+
+# CSV inventory saved to disk
+hellhound --list-fingerprints --format csv --output-file coverage.csv
+```
+
+Because it loads through the same path as a scan, it reflects any
+`--fingerprint-dir` merge — a quick way to confirm a custom set merged as
+expected before running a sweep:
+
+```bash
+hellhound --list-fingerprints --fingerprint-dir ~/fp --format text
 ```
 
 ### Output

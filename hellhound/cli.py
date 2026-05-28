@@ -38,6 +38,91 @@ CSV_COLUMNS = [
     "evidence",
 ]
 
+# Columns for the --list-fingerprints CSV view (inventory of the loaded set,
+# not scan findings — distinct from CSV_COLUMNS above).
+FINGERPRINT_LIST_COLUMNS = [
+    "id",
+    "vendor",
+    "model_class",
+    "severity",
+    "auth_type",
+    "auth_path",
+    "default_credentials",
+    "cve",
+]
+
+
+def _format_credentials(fp) -> str:
+    """Render a fingerprint's default credentials as 'user:pass' pairs.
+
+    A blank password renders as 'user:' so an empty-string default (common on
+    cameras) stays visible. Pairs are separated by ';'.
+    """
+    return ";".join(f"{c.username}:{c.password}" for c in fp.credentials)
+
+
+def format_fingerprint_list(fingerprints, fmt: str) -> str:
+    """Render the loaded fingerprint database for ``--list-fingerprints``.
+
+    This is an inventory view of the *capabilities* hellhound currently carries
+    (after any ``--fingerprint-dir`` merge), not scan results. It lets an
+    operator audit which device classes, vendors, severities and CVEs are
+    covered, and confirm a custom set merged as expected — all without touching
+    the network. ``sarif`` is not a meaningful inventory format and falls back
+    to ``json``.
+    """
+    if fmt == "json" or fmt == "sarif":
+        payload = {
+            "summary": {"fingerprint_count": len(fingerprints)},
+            "fingerprints": [
+                {
+                    "id": fp.id,
+                    "vendor": fp.vendor,
+                    "model_class": fp.model_class,
+                    "severity": fp.severity,
+                    "auth_type": fp.auth.type,
+                    "auth_path": fp.auth.path,
+                    "default_credentials": [
+                        {"username": c.username, "password": c.password}
+                        for c in fp.credentials
+                    ],
+                    "cve": list(fp.cve),
+                }
+                for fp in fingerprints
+            ],
+        }
+        return json.dumps(payload, indent=2)
+
+    if fmt == "csv":
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(FINGERPRINT_LIST_COLUMNS)
+        for fp in fingerprints:
+            writer.writerow(
+                [
+                    fp.id,
+                    fp.vendor,
+                    fp.model_class,
+                    fp.severity,
+                    fp.auth.type,
+                    fp.auth.path,
+                    _format_credentials(fp),
+                    ";".join(fp.cve),
+                ]
+            )
+        return buf.getvalue().rstrip("\r\n")
+
+    # text
+    lines: list[str] = [f"hellhound: {len(fingerprints)} fingerprint(s) loaded"]
+    for fp in fingerprints:
+        cve = f" [{', '.join(fp.cve)}]" if fp.cve else ""
+        lines.append(
+            f"[{fp.severity.upper()}] {fp.id}: {fp.vendor} ({fp.model_class}) "
+            f"auth={fp.auth.type}{cve}"
+        )
+        lines.append(f"  default creds: {_format_credentials(fp) or '(none)'}")
+    return "\n".join(lines)
+
 
 def parse_ports(value: str) -> list[int]:
     """Parse a comma-separated port list into a list of ints."""
@@ -71,10 +156,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--target",
         "-t",
         action="append",
-        required=True,
         metavar="CIDR|IP",
         help="Target to scan: a CIDR range (e.g. 192.0.2.0/24) or single IP/host. "
-        "Repeat to scan multiple targets.",
+        "Repeat to scan multiple targets. Required unless --list-fingerprints "
+        "is given.",
     )
     parser.add_argument(
         "--ports",
@@ -99,6 +184,16 @@ def build_parser() -> argparse.ArgumentParser:
         "(matching --fingerprint-set). Custom entries override bundled ones "
         "by id; the rest are appended. Lets you maintain a private fingerprint "
         "set without patching hellhound.",
+    )
+    parser.add_argument(
+        "--list-fingerprints",
+        action="store_true",
+        default=False,
+        help="Inventory mode: print the loaded fingerprint database (after any "
+        "--fingerprint-dir merge) and exit without scanning. Honours --format "
+        "(json/text/csv) and --output-file. Use it to audit device-class, "
+        "vendor, severity and CVE coverage, or to verify a custom set merged "
+        "correctly. No target is required in this mode.",
     )
     parser.add_argument(
         "--format",
@@ -445,6 +540,31 @@ def main(argv: list[str] | None = None) -> int:
         )
     except FileNotFoundError as exc:
         print(f"error: unknown fingerprint set: {exc}", file=sys.stderr)
+        return 2
+
+    # Inventory mode: print the loaded fingerprint database and exit. No target
+    # or network access required — this honours --fingerprint-dir merges so an
+    # operator can audit and verify their effective coverage before scanning.
+    if args.list_fingerprints:
+        rendered = format_fingerprint_list(fingerprints, args.format)
+        if args.output_file is None:
+            print(rendered)
+            return 0
+        try:
+            with open(args.output_file, "w", newline="", encoding="utf-8") as fh:
+                fh.write(rendered)
+                fh.write("\n")
+        except OSError as exc:
+            print(f"error: could not write output file: {exc}", file=sys.stderr)
+            return 2
+        return 0
+
+    if not args.target:
+        print(
+            "error: --target is required (or use --list-fingerprints to "
+            "inspect the fingerprint database)",
+            file=sys.stderr,
+        )
         return 2
 
     try:
