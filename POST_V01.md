@@ -135,7 +135,14 @@ materially slowing scans.
 
 ---
 
-### 7. Digest report: machine-readable SARIF 2.1.0 output format
+### 7. Digest report: machine-readable SARIF 2.1.0 output format — ✅ IMPLEMENTED (Phase 2, Rotation 8)
+
+**Status:** Done. Added `--format sarif`, a `format_sarif(findings)` builder in
+`hellhound/cli.py` producing a valid SARIF 2.1.0 document (one `result` per
+confirmed default-credential finding, severity → SARIF `level` mapping, host/port
+as a location URI, CVEs as result tags/properties, deduplicated rules per
+fingerprint), with 12 unit tests in `tests/test_sarif.py` and README docs
+including a GitHub code-scanning upload example. No engine changes.
 
 **Why seventh:** Security teams integrating hellhound into CI/CD pipelines or
 GitHub Advanced Security expect SARIF output for code-scanning upload. SARIF
