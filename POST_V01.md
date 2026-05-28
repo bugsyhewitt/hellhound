@@ -255,6 +255,35 @@ scans manageable without polluting stdout JSON.
 
 ---
 
+### 11. `--list-fingerprints` inventory mode — ✅ IMPLEMENTED (Phase 2, Rotation 12)
+
+**Status:** Done. Items 1–10 above were all shipped (the status notes for items
+2–6 were stale; their code, flags, and tests are present), so the original
+ranked roadmap was exhausted. This rotation added the highest-value remaining
+in-scope gap: an inventory/inspection mode. `--list-fingerprints` prints the
+loaded fingerprint database (after any `--fingerprint-dir` merge) and exits
+without scanning — no `--target` required. `--target` is now conditionally
+required (validated in `main()`). A new
+`format_fingerprint_list(fingerprints, fmt)` renders the set in `text`, `json`,
+or `csv` (`sarif` falls back to `json`), each entry showing id, vendor,
+model_class, severity, auth type/path, default credentials (blank passwords stay
+visible), and CVEs. It honours `--output-file`. 15 unit tests in
+`tests/test_list_fingerprints.py` (parser surface, all three formats, sarif
+fallback, the no-network short-circuit asserting the scanner is never invoked,
+the conditional `--target` validation, the output-file path and its error case,
+and the custom-directory merge view). README documents the flag in the options
+table and a new "Listing the fingerprint database" usage section. No engine
+changes.
+
+**Why this gap:** hellhound carries 24+ fingerprints and supports private custom
+sets via `--fingerprint-dir`. Operators had no way to see what coverage they had
+without reading YAML or running a live scan. Inventory mode answers "what can
+this detect?" and "did my custom set merge?" offline, composing with the
+existing format/output machinery. It is strictly detection-only and reads no
+network, fully within the v0.1 contract and the out-of-scope guardrails.
+
+---
+
 ## Out-of-scope (not in any Phase 2 lap)
 
 These directions are explicitly out of scope for hellhound and must not be
