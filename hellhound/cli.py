@@ -34,6 +34,7 @@ CSV_COLUMNS = [
     "default_creds",
     "username",
     "password",
+    "cve",
     "evidence",
 ]
 
@@ -189,6 +190,7 @@ def _render(findings: list[Finding], fmt: str, only_vulnerable: bool = False) ->
                     "true" if f.default_creds else "false",
                     cred.username if cred else "",
                     cred.password if cred else "",
+                    ";".join(f.cve),
                     f.evidence,
                 ]
             )
@@ -206,6 +208,8 @@ def _render(findings: list[Finding], fmt: str, only_vulnerable: bool = False) ->
             f"[{f.severity.upper()}] {f.host}:{f.port} {f.vendor} "
             f"({f.model_class}) -> {status}{cred}"
         )
+        if f.cve:
+            lines.append(f"  cve: {', '.join(f.cve)}")
         lines.append(f"  evidence: {f.evidence}")
     return "\n".join(lines)
 

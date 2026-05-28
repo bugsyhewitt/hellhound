@@ -122,6 +122,7 @@ CSV_COLUMNS = [
     "default_creds",
     "username",
     "password",
+    "cve",
     "evidence",
 ]
 

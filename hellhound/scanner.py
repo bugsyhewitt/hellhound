@@ -16,7 +16,7 @@ from __future__ import annotations
 import asyncio
 import ipaddress
 import re
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 
 import httpx
 
@@ -51,6 +51,7 @@ class Finding:
     default_creds: bool
     matched_credential: Credential | None
     evidence: str
+    cve: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         cred = (
@@ -60,6 +61,7 @@ class Finding:
         )
         data = asdict(self)
         data["matched_credential"] = cred
+        data["cve"] = list(self.cve)
         return data
 
 
@@ -266,6 +268,7 @@ class Scanner:
             default_creds=matched is not None,
             matched_credential=matched,
             evidence=evidence,
+            cve=list(fp.cve),
         )
 
     async def _try_auth(
