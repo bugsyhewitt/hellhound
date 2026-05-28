@@ -79,6 +79,7 @@ Key options:
 | `--target`, `-t` | CIDR range or single IP/host. Repeat for multiple targets. | *(required)* |
 | `--ports`, `-p` | Comma-separated ports to probe. | `80,443,8080,8443` |
 | `--fingerprint-set`, `-f` | Name of the fingerprint set under `hellhound/fingerprints/`. | `default` |
+| `--fingerprint-dir` | Directory holding a custom `<set>.yaml`. Custom entries override bundled ones by `id`; the rest are appended. | *(none)* |
 | `--format` | `json`, `text`, `csv`, or `sarif`. | `json` |
 | `--output-file`, `-o` | Write output to this path instead of stdout. | *(stdout)* |
 | `--timeout` | Per-request timeout (seconds). | `5.0` |
@@ -388,6 +389,27 @@ Matching rules:
 
 Add a new device by appending an entry. Load an alternate set with
 `--fingerprint-set <name>` (the file must be `hellhound/fingerprints/<name>.yaml`).
+
+### Custom fingerprint directory
+
+To keep a private fingerprint set — for proprietary or unreleased devices —
+without patching hellhound, point `--fingerprint-dir` at a directory containing
+a `<set>.yaml` named to match `--fingerprint-set` (so `default.yaml` for the
+default set). hellhound always loads the bundled database as the base, then
+merges your file on top:
+
+- A custom entry whose `id` matches a bundled entry **replaces** it in place
+  (override a shipped fingerprint without forking the database).
+- A custom entry with a new `id` is **appended** after the bundled entries.
+- Bundled-only entries are preserved.
+
+```bash
+# ~/fp/default.yaml holds your private/extra fingerprints
+hellhound --target 192.0.2.0/24 --fingerprint-dir ~/fp
+```
+
+If the directory is missing or has no matching `<set>.yaml`, hellhound exits
+with an error rather than silently ignoring the flag.
 
 ---
 

@@ -18,7 +18,7 @@ import sys
 from typing import TextIO
 
 from . import __version__
-from .fingerprint import load_fingerprint_set
+from .fingerprint import load_fingerprint_set_with_dir
 from .scanner import Finding, Scanner
 
 DEFAULT_PORTS = "80,443,8080,8443"
@@ -90,6 +90,15 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="NAME",
         help="Name of the fingerprint set to load from hellhound/fingerprints "
         "(default: default).",
+    )
+    parser.add_argument(
+        "--fingerprint-dir",
+        default=None,
+        metavar="PATH",
+        help="Directory holding a custom fingerprint set named '<set>.yaml' "
+        "(matching --fingerprint-set). Custom entries override bundled ones "
+        "by id; the rest are appended. Lets you maintain a private fingerprint "
+        "set without patching hellhound.",
     )
     parser.add_argument(
         "--format",
@@ -371,7 +380,10 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     try:
-        fingerprints = load_fingerprint_set(args.fingerprint_set)
+        fingerprints = load_fingerprint_set_with_dir(
+            args.fingerprint_set,
+            fingerprint_dir=args.fingerprint_dir,
+        )
     except FileNotFoundError as exc:
         print(f"error: unknown fingerprint set: {exc}", file=sys.stderr)
         return 2
