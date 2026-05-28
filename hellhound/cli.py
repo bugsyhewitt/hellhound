@@ -134,6 +134,14 @@ def build_parser() -> argparse.ArgumentParser:
         "Lines starting with '#' and blank lines are ignored.",
     )
     parser.add_argument(
+        "--only-vulnerable",
+        action="store_true",
+        default=False,
+        help="Digest mode: report only findings with confirmed default "
+        "credentials. Suppresses matched-but-rotated findings to cut noise "
+        "on large sweeps. Summary counts still reflect all matches.",
+    )
+    parser.add_argument(
         "--version",
         action="version",
         version=f"hellhound {__version__}",
@@ -141,16 +149,25 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _render(findings: list[Finding], fmt: str) -> str:
-    """Render findings to a string in the requested format."""
+def _render(findings: list[Finding], fmt: str, only_vulnerable: bool = False) -> str:
+    """Render findings to a string in the requested format.
+
+    When *only_vulnerable* is True (digest mode), the rendered findings list is
+    filtered to entries with confirmed default credentials. The summary counts
+    always reflect the full match set so the operator still sees how many
+    devices matched a fingerprint versus how many were exposed.
+    """
     flagged = [f for f in findings if f.default_creds]
+    # The displayed findings are the digest subset when requested.
+    shown = flagged if only_vulnerable else findings
     if fmt == "json":
         payload = {
             "summary": {
                 "devices_matched": len(findings),
                 "devices_with_default_creds": len(flagged),
+                "only_vulnerable": only_vulnerable,
             },
-            "findings": [f.to_dict() for f in findings],
+            "findings": [f.to_dict() for f in shown],
         }
         return json.dumps(payload, indent=2)
 
@@ -158,7 +175,7 @@ def _render(findings: list[Finding], fmt: str) -> str:
         buf = io.StringIO()
         writer = csv.writer(buf)
         writer.writerow(CSV_COLUMNS)
-        for f in findings:
+        for f in shown:
             cred = f.matched_credential
             writer.writerow(
                 [
@@ -182,7 +199,7 @@ def _render(findings: list[Finding], fmt: str) -> str:
     # text
     lines: list[str] = []
     lines.append(f"hellhound: {len(findings)} device(s) matched, {len(flagged)} with default creds")
-    for f in findings:
+    for f in shown:
         status = "DEFAULT-CREDS" if f.default_creds else "matched (creds rotated)"
         cred = f"  creds: {f.matched_credential}" if f.matched_credential else ""
         lines.append(
@@ -194,15 +211,22 @@ def _render(findings: list[Finding], fmt: str) -> str:
 
 
 def format_output(
-    findings: list[Finding], fmt: str, stream: TextIO | None = None
+    findings: list[Finding],
+    fmt: str,
+    stream: TextIO | None = None,
+    only_vulnerable: bool = False,
 ) -> str | None:
     """Format findings.
 
     With no ``stream``, return the formatted text as a string (back-compatible).
     With a ``stream``, write the formatted text (plus a trailing newline) to it
     and return ``None``.
+
+    When *only_vulnerable* is True, the rendered findings are restricted to
+    confirmed default-credential exposures (digest mode); summary counts are
+    unaffected.
     """
-    rendered = _render(findings, fmt)
+    rendered = _render(findings, fmt, only_vulnerable=only_vulnerable)
     if stream is None:
         return rendered
     stream.write(rendered)
@@ -246,14 +270,23 @@ def main(argv: list[str] | None = None) -> int:
     if args.output_file is None:
         # stdout: csv module wants newline="" but sys.stdout is already managed;
         # render to a string and print so behaviour is unchanged for json/text.
-        print(format_output(findings, args.format))
+        print(
+            format_output(
+                findings, args.format, only_vulnerable=args.only_vulnerable
+            )
+        )
         return 0
 
     try:
         # newline="" lets the csv module control line terminators (avoids the
         # classic doubled-newline-on-Windows issue); harmless for json/text.
         with open(args.output_file, "w", newline="", encoding="utf-8") as fh:
-            format_output(findings, args.format, stream=fh)
+            format_output(
+                findings,
+                args.format,
+                stream=fh,
+                only_vulnerable=args.only_vulnerable,
+            )
     except OSError as exc:
         print(f"error: could not write output file: {exc}", file=sys.stderr)
         return 2

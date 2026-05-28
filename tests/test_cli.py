@@ -273,3 +273,103 @@ def test_main_unknown_fingerprint_set_errors(capsys):
     err = capsys.readouterr().err
     assert exit_code != 0
     assert "fingerprint" in err.lower()
+
+
+# ---------------------------------------------------------------- --only-vulnerable
+
+
+def test_parser_only_vulnerable_defaults_false():
+    parser = cli.build_parser()
+    args = parser.parse_args(["--target", "192.0.2.1"])
+    assert args.only_vulnerable is False
+
+
+def test_parser_only_vulnerable_flag_sets_true():
+    parser = cli.build_parser()
+    args = parser.parse_args(["--target", "192.0.2.1", "--only-vulnerable"])
+    assert args.only_vulnerable is True
+
+
+def test_format_json_only_vulnerable_filters_findings():
+    """Digest mode drops matched-but-rotated findings; summary keeps totals."""
+    out = cli.format_output(_mixed_findings(), "json", only_vulnerable=True)
+    parsed = json.loads(out)
+    # summary reflects ALL matches
+    assert parsed["summary"]["devices_matched"] == 2
+    assert parsed["summary"]["devices_with_default_creds"] == 1
+    assert parsed["summary"]["only_vulnerable"] is True
+    # findings list only contains the flagged device
+    assert len(parsed["findings"]) == 1
+    assert parsed["findings"][0]["vendor"] == "Hikvision"
+    assert parsed["findings"][0]["default_creds"] is True
+
+
+def test_format_json_default_includes_all_findings():
+    out = cli.format_output(_mixed_findings(), "json")
+    parsed = json.loads(out)
+    assert parsed["summary"]["only_vulnerable"] is False
+    assert len(parsed["findings"]) == 2
+
+
+def test_format_csv_only_vulnerable_filters_rows():
+    out = cli.format_output(_mixed_findings(), "csv", only_vulnerable=True)
+    rows = list(csv.reader(io.StringIO(out)))
+    # header + only the flagged row
+    assert rows[0] == CSV_COLUMNS
+    assert len(rows) == 2
+    assert dict(zip(CSV_COLUMNS, rows[1]))["vendor"] == "Hikvision"
+
+
+def test_format_text_only_vulnerable_omits_rotated():
+    out = cli.format_output(_mixed_findings(), "text", only_vulnerable=True)
+    # summary line still mentions the full matched count
+    assert "2 device(s) matched" in out
+    # rotated finding's vendor is suppressed from the body
+    assert "Dahua" not in out
+    assert "Hikvision" in out
+
+
+def test_main_only_vulnerable_end_to_end(monkeypatch, capsys):
+    findings = _mixed_findings()
+
+    async def fake_scan(self, targets, ports, **kwargs):
+        return findings
+
+    monkeypatch.setattr("hellhound.scanner.Scanner.scan", fake_scan)
+
+    exit_code = cli.main(
+        ["--target", "203.0.113.10", "--format", "json", "--only-vulnerable"]
+    )
+    assert exit_code == 0
+    parsed = json.loads(capsys.readouterr().out)
+    assert parsed["summary"]["devices_matched"] == 2
+    assert len(parsed["findings"]) == 1
+    assert parsed["findings"][0]["vendor"] == "Hikvision"
+
+
+def test_main_only_vulnerable_output_file(monkeypatch, capsys, tmp_path):
+    findings = _mixed_findings()
+
+    async def fake_scan(self, targets, ports, **kwargs):
+        return findings
+
+    monkeypatch.setattr("hellhound.scanner.Scanner.scan", fake_scan)
+
+    out_path = tmp_path / "digest.csv"
+    exit_code = cli.main(
+        [
+            "--target",
+            "203.0.113.10",
+            "--format",
+            "csv",
+            "--only-vulnerable",
+            "--output-file",
+            str(out_path),
+        ]
+    )
+    assert exit_code == 0
+    assert capsys.readouterr().out == ""
+    rows = list(csv.reader(out_path.open(newline="", encoding="utf-8")))
+    assert rows[0] == CSV_COLUMNS
+    assert len(rows) == 2  # header + 1 flagged row
+    assert dict(zip(CSV_COLUMNS, rows[1]))["vendor"] == "Hikvision"
