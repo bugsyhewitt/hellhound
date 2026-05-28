@@ -284,6 +284,34 @@ network, fully within the v0.1 contract and the out-of-scope guardrails.
 
 ---
 
+### 12. `--exit-code N` findings-based exit status — ✅ IMPLEMENTED (Phase 2, Rotation 13)
+
+**Status:** Done. Added `--exit-code N` (default `0`) to the CLI. A new pure
+helper `cli.resolve_exit_code(findings, exit_code_when_found)` returns
+`exit_code_when_found` when any finding has `default_creds is True` and the
+operator opted in with a non-zero value; otherwise `0`. Wired into both scan
+return paths in `main()` (stdout and `--output-file`), leaving inventory mode and
+the exit-2 error paths untouched. The signal is the confirmed-exposure set and is
+deliberately independent of `--only-vulnerable` (which only filters displayed
+findings), so the exit code is stable across output modes. Default `0` preserves
+the original always-exit-0 contract. 16 unit tests in `tests/test_exit_code.py`
+(parser surface incl. non-int rejection, the resolve helper across empty/rotated/
+flagged/mixed inputs and custom non-zero codes, end-to-end exit on exposure vs
+no-exposure, default back-compat, output-file path, `--only-vulnerable`
+independence, exit-2 input errors unaffected, and `--list-fingerprints` never
+tripping it). README gains an "Exit codes and CI/CD gating" section plus an
+options-table row. No engine changes.
+
+**Why this gap:** With items 1–11 shipped the ranked roadmap was exhausted. The
+highest-value remaining in-scope gap was the missing exit-status contract: every
+mature scanner (trivy, grype, …) lets you fail a pipeline on findings, but
+hellhound always exited 0, so it could not gate CI/CD or a shell script without
+parsing its own JSON. This is the standard, expected scanner behaviour and is
+strictly a reporting concern — detection-only, no new network behaviour, fully
+within the v0.1 contract and the out-of-scope guardrails.
+
+---
+
 ## Out-of-scope (not in any Phase 2 lap)
 
 These directions are explicitly out of scope for hellhound and must not be
