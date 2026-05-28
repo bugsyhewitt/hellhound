@@ -85,6 +85,7 @@ Key options:
 | `--concurrency` | Max concurrent requests. | `50` |
 | `--exclude`, `-e` | Exclude a CIDR or IP from scanning. Repeatable. | *(none)* |
 | `--exclude-file` | Path to a file of CIDR/IP exclusions (one per line, `#` comments). | *(none)* |
+| `--only-vulnerable` | Digest mode: report only findings with confirmed default credentials. Summary counts stay full. | *(off)* |
 
 ### Output
 
@@ -94,7 +95,8 @@ JSON output groups a summary with per-device findings:
 {
   "summary": {
     "devices_matched": 1,
-    "devices_with_default_creds": 1
+    "devices_with_default_creds": 1,
+    "only_vulnerable": false
   },
   "findings": [
     {
@@ -116,6 +118,43 @@ JSON output groups a summary with per-device findings:
 
 A finding with `"default_creds": true` is the actionable result: that device
 still accepts the listed default credentials and should be reconfigured.
+
+#### Digest mode (`--only-vulnerable`)
+
+On a large CIDR sweep most hosts are unreachable or match no fingerprint, and
+many that do match have already had their default credentials rotated. When you
+only care about confirmed exposures, pass `--only-vulnerable` to drop every
+no-match and matched-but-rotated finding from the output:
+
+```bash
+hellhound --target 192.0.2.0/24 --only-vulnerable
+```
+
+The findings list is filtered to entries where `default_creds` is `true`, but
+the `summary` still reports the full picture so you don't lose situational
+awareness — `devices_matched` is the total that matched a fingerprint,
+`devices_with_default_creds` is how many of those were exposed, and
+`only_vulnerable` records that digest mode was applied:
+
+```json
+{
+  "summary": {
+    "devices_matched": 37,
+    "devices_with_default_creds": 4,
+    "only_vulnerable": true
+  },
+  "findings": [
+    { "host": "192.0.2.10", "default_creds": true, "vendor": "Hikvision", "...": "..." }
+  ]
+}
+```
+
+Digest mode works with every format (`json`, `text`, `csv`) and composes with
+`--output-file`, so you can write a SIEM-ready CSV of only the exposed devices:
+
+```bash
+hellhound --target 10.0.0.0/16 --only-vulnerable --format csv --output-file exposed.csv
+```
 
 ### Exclusions
 
