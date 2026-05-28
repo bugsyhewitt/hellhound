@@ -130,6 +130,17 @@ def build_parser() -> argparse.ArgumentParser:
         "flaky IoT webservers.",
     )
     parser.add_argument(
+        "--rate-limit",
+        type=float,
+        default=0.0,
+        metavar="N",
+        help="Cap outbound requests to N per second across the whole scan "
+        "(0 = unlimited, the default). Seats above --concurrency: a leaky "
+        "bucket paces requests so high concurrency never exceeds the rate. Use "
+        "this to avoid overwhelming fragile embedded webservers (some cameras "
+        "watchdog-reboot under burst load) or tripping IDS rules.",
+    )
+    parser.add_argument(
         "--exclude",
         "-e",
         action="append",
@@ -379,6 +390,7 @@ def main(argv: list[str] | None = None) -> int:
         timeout=args.timeout,
         concurrency=args.concurrency,
         retries=args.retries,
+        rate_limit=args.rate_limit,
     )
 
     findings = asyncio.run(scanner.scan(args.target, ports, exclusions=exclusions))

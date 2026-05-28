@@ -83,6 +83,7 @@ Key options:
 | `--output-file`, `-o` | Write output to this path instead of stdout. | *(stdout)* |
 | `--timeout` | Per-request timeout (seconds). | `5.0` |
 | `--concurrency` | Max concurrent requests. | `50` |
+| `--rate-limit` | Cap outbound requests per second across the whole scan (`0` = unlimited). Seats above `--concurrency` so high concurrency never exceeds the rate. | `0` |
 | `--retries` | Total attempts per request before giving up. `>1` retries transient connection failures with exponential backoff. | `1` |
 | `--exclude`, `-e` | Exclude a CIDR or IP from scanning. Repeatable. | *(none)* |
 | `--exclude-file` | Path to a file of CIDR/IP exclusions (one per line, `#` comments). | *(none)* |
@@ -305,6 +306,25 @@ the third 1.0s, and so on. Both the landing-page fetch and the
 default-credential check are retried. A response that arrives — even an HTTP
 error like `401` — is never retried; only transport-level failures are. If
 every attempt fails the host is silently dropped, exactly as with the default.
+
+### Rate limiting
+
+`--concurrency` controls how many requests run *in parallel*; it does not bound
+how *fast* requests leave. A high concurrency can overwhelm small embedded
+webservers — some cameras watchdog-reboot under burst load — or trip IDS rules
+in monitored environments. `--rate-limit N` caps outbound requests to `N` per
+second across the whole scan:
+
+```bash
+hellhound --target 192.0.2.0/24 --concurrency 50 --rate-limit 5
+```
+
+The throttle is a leaky bucket seated **above** the concurrency semaphore:
+requests are spaced at least `1 / N` seconds apart regardless of how many
+coroutines are ready to fire, so the effective request rate never exceeds the
+cap. The default `--rate-limit 0` disables throttling and preserves the original
+unbounded behaviour. The cap applies to every outbound request — landing-page
+fetches and default-credential checks alike, including retries.
 
 ---
 
