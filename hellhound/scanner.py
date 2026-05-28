@@ -16,6 +16,7 @@ from __future__ import annotations
 import asyncio
 import ipaddress
 import re
+from collections.abc import Awaitable, Callable
 from dataclasses import asdict, dataclass, field
 
 import httpx
@@ -80,12 +81,23 @@ class Scanner:
         timeout: float = 5.0,
         concurrency: int = 50,
         verify_tls: bool = False,
+        retries: int = 1,
+        backoff: float = 0.5,
     ) -> None:
         self.fingerprints = fingerprints
         self._transport = transport
         self._timeout = timeout
         self._verify_tls = verify_tls
         self._semaphore = asyncio.Semaphore(concurrency)
+        # ``retries`` is the total number of attempts per request. 1 (the
+        # default) means a single try and preserves the original behaviour;
+        # 2 means one silent retry after a transport failure, and so on. A
+        # value below 1 is clamped to 1.
+        self._retries = max(1, retries)
+        # Base backoff in seconds; the delay before attempt N (1-indexed) is
+        # ``backoff * (N - 1)`` — i.e. 0s before the first try, then 0.5s,
+        # 1.0s, ... by default.
+        self._backoff = max(0.0, backoff)
 
     # ------------------------------------------------------------------ exclusions
 
@@ -275,17 +287,20 @@ class Scanner:
         self, client: httpx.AsyncClient, base: str, auth: AuthCheck, cred: Credential
     ) -> bool:
         url = f"{base}{auth.path}"
-        try:
+
+        async def request() -> httpx.Response:
             if auth.type == "basic":
-                response = await client.get(url, auth=(cred.username, cred.password))
-            else:  # form
-                data = {
-                    auth.username_field: cred.username,
-                    auth.password_field: cred.password,
-                    **auth.extra_fields,
-                }
-                response = await client.request(auth.method, url, data=data)
-        except httpx.HTTPError:
+                return await client.get(url, auth=(cred.username, cred.password))
+            # form
+            data = {
+                auth.username_field: cred.username,
+                auth.password_field: cred.password,
+                **auth.extra_fields,
+            }
+            return await client.request(auth.method, url, data=data)
+
+        response = await self._with_retries(request)
+        if response is None:
             return False
 
         if response.status_code not in auth.success_status:
@@ -295,7 +310,29 @@ class Scanner:
         return True
 
     async def _safe_get(self, client: httpx.AsyncClient, url: str) -> httpx.Response | None:
-        try:
-            return await client.get(url)
-        except httpx.HTTPError:
-            return None
+        return await self._with_retries(lambda: client.get(url))
+
+    async def _with_retries(
+        self, request: Callable[[], Awaitable[httpx.Response]]
+    ) -> httpx.Response | None:
+        """Run *request* up to ``self._retries`` times with exponential backoff.
+
+        IoT devices on flaky broadband or overloaded embedded webservers often
+        drop the first connection, producing a false negative. Retrying a
+        transient transport error a couple of times recovers many of these
+        without materially slowing a scan.
+
+        Returns the first successful response, or ``None`` if every attempt
+        raised an ``httpx.HTTPError`` (timeouts, connection resets, etc.).
+        The backoff before attempt N (1-indexed) is ``self._backoff * (N - 1)``,
+        so the first attempt is immediate.
+        """
+        for attempt in range(1, self._retries + 1):
+            if attempt > 1 and self._backoff:
+                await asyncio.sleep(self._backoff * (attempt - 1))
+            try:
+                return await request()
+            except httpx.HTTPError:
+                if attempt >= self._retries:
+                    return None
+        return None

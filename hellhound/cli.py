@@ -119,6 +119,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Maximum concurrent requests (default: 50).",
     )
     parser.add_argument(
+        "--retries",
+        type=int,
+        default=1,
+        metavar="N",
+        help="Total attempts per request before giving up (default: 1, a "
+        "single try). Higher values retry transient connection failures with "
+        "exponential backoff (0.5s x attempt), recovering false negatives from "
+        "flaky IoT webservers.",
+    )
+    parser.add_argument(
         "--exclude",
         "-e",
         action="append",
@@ -267,6 +277,7 @@ def main(argv: list[str] | None = None) -> int:
         fingerprints=fingerprints,
         timeout=args.timeout,
         concurrency=args.concurrency,
+        retries=args.retries,
     )
 
     findings = asyncio.run(scanner.scan(args.target, ports, exclusions=exclusions))

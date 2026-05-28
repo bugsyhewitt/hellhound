@@ -83,6 +83,7 @@ Key options:
 | `--output-file`, `-o` | Write output to this path instead of stdout. | *(stdout)* |
 | `--timeout` | Per-request timeout (seconds). | `5.0` |
 | `--concurrency` | Max concurrent requests. | `50` |
+| `--retries` | Total attempts per request before giving up. `>1` retries transient connection failures with exponential backoff. | `1` |
 | `--exclude`, `-e` | Exclude a CIDR or IP from scanning. Repeatable. | *(none)* |
 | `--exclude-file` | Path to a file of CIDR/IP exclusions (one per line, `#` comments). | *(none)* |
 | `--only-vulnerable` | Digest mode: report only findings with confirmed default credentials. Summary counts stay full. | *(off)* |
@@ -227,6 +228,27 @@ empty. The `cve` column lists any CVEs linked to the matched fingerprint,
 semicolon-separated when there is more than one (e.g.
 `CVE-2024-6047;CVE-2024-11120`); it is empty when the fingerprint has no
 associated CVE.
+
+### Retries
+
+IoT devices on flaky consumer broadband or overloaded embedded webservers
+frequently drop the first connection. A single attempt then records a false
+negative — the device is reachable, hellhound just caught it on a bad moment.
+
+By default hellhound makes a single attempt per request (`--retries 1`),
+preserving fast, predictable scans. Raise `--retries` to retry transient
+transport failures (timeouts, connection resets) with exponential backoff:
+
+```bash
+hellhound --target 192.0.2.0/24 --retries 3
+```
+
+`--retries N` is the **total** number of attempts. The backoff before attempt
+*N* is `0.5s × (N − 1)`, so the first try is immediate, the second waits 0.5s,
+the third 1.0s, and so on. Both the landing-page fetch and the
+default-credential check are retried. A response that arrives — even an HTTP
+error like `401` — is never retried; only transport-level failures are. If
+every attempt fails the host is silently dropped, exactly as with the default.
 
 ---
 
