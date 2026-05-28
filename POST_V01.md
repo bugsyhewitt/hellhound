@@ -161,7 +161,20 @@ most enterprise scanners.
 
 ---
 
-### 8. Digest report: `--rate-limit` flag (requests/second cap)
+### 8. Digest report: `--rate-limit` flag (requests/second cap) — ✅ IMPLEMENTED (Phase 2, Rotation 9)
+
+**Status:** Done. Added `--rate-limit N` to the CLI (requests/second, `0` =
+unlimited, default `0`) wired into `Scanner(rate_limit=...)`. The `Scanner`
+seats a leaky-bucket throttle (`_throttle()`) above the concurrency semaphore in
+the single request chokepoint `_with_retries`, so every outbound request —
+landing-page fetch and auth check, including retries — is paced at least
+`1 / rate_limit` seconds apart across the whole scan. Slot reservation is
+serialised by an `asyncio.Lock` while the sleep itself happens outside the lock,
+so the cap holds without serialising waits. 7 unit tests in
+`tests/test_rate_limit.py` (deterministic via a fake monotonic clock + fake
+`asyncio.sleep`) cover min-interval config, negative-value clamping, request
+pacing, the no-throttle no-op path, no-overpacing once the clock advances, and
+CLI parsing. README options table updated with the embedded-device note.
 
 **Why eighth:** Default concurrency of 50 with no rate cap can overwhelm small
 embedded devices, trigger firmware-level watchdog reboots on some cameras, or

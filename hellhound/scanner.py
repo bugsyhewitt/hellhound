@@ -16,6 +16,7 @@ from __future__ import annotations
 import asyncio
 import ipaddress
 import re
+import time
 from collections.abc import Awaitable, Callable
 from dataclasses import asdict, dataclass, field
 
@@ -83,6 +84,7 @@ class Scanner:
         verify_tls: bool = False,
         retries: int = 1,
         backoff: float = 0.5,
+        rate_limit: float = 0.0,
     ) -> None:
         self.fingerprints = fingerprints
         self._transport = transport
@@ -98,6 +100,18 @@ class Scanner:
         # ``backoff * (N - 1)`` — i.e. 0s before the first try, then 0.5s,
         # 1.0s, ... by default.
         self._backoff = max(0.0, backoff)
+        # ``rate_limit`` is a cap on outbound requests per second across the
+        # whole scan. 0 (the default) disables throttling. The throttle is a
+        # leaky-bucket: requests are spaced at least ``1 / rate_limit`` seconds
+        # apart, seated above the concurrency semaphore so a high concurrency
+        # never exceeds the configured rate. This protects fragile embedded
+        # webservers (some cameras watchdog-reboot under burst load) and avoids
+        # tripping IDS rules in monitored environments.
+        self._rate_limit = max(0.0, rate_limit)
+        self._min_interval = 1.0 / self._rate_limit if self._rate_limit > 0 else 0.0
+        self._rate_lock = asyncio.Lock()
+        # Monotonic timestamp at which the next request is allowed to fire.
+        self._next_allowed = 0.0
 
     # ------------------------------------------------------------------ exclusions
 
@@ -330,9 +344,31 @@ class Scanner:
         for attempt in range(1, self._retries + 1):
             if attempt > 1 and self._backoff:
                 await asyncio.sleep(self._backoff * (attempt - 1))
+            await self._throttle()
             try:
                 return await request()
             except httpx.HTTPError:
                 if attempt >= self._retries:
                     return None
         return None
+
+    async def _throttle(self) -> None:
+        """Block until the configured requests-per-second rate permits a call.
+
+        Implements a leaky-bucket: each acquisition reserves the next slot at
+        ``last_slot + min_interval`` and sleeps until then. Acquisitions are
+        serialised by a lock so concurrent coroutines (up to the concurrency
+        semaphore) are paced rather than bursting. A ``rate_limit`` of 0 makes
+        this a no-op, preserving the original unthrottled behaviour.
+        """
+        if self._min_interval <= 0.0:
+            return
+        async with self._rate_lock:
+            now = time.monotonic()
+            # The next slot is the later of "right now" and "one interval after
+            # the previously reserved slot".
+            slot = max(now, self._next_allowed)
+            self._next_allowed = slot + self._min_interval
+            wait = slot - now
+        if wait > 0:
+            await asyncio.sleep(wait)
