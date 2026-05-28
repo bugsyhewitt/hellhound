@@ -89,6 +89,32 @@ Key options:
 | `--exclude`, `-e` | Exclude a CIDR or IP from scanning. Repeatable. | *(none)* |
 | `--exclude-file` | Path to a file of CIDR/IP exclusions (one per line, `#` comments). | *(none)* |
 | `--only-vulnerable` | Digest mode: report only findings with confirmed default credentials. Summary counts stay full. | *(off)* |
+| `--progress` | Emit a live progress line to stderr (hosts scanned / total, findings so far). Auto-on when stderr is a TTY. | *(auto)* |
+| `--quiet`, `-q` | Suppress all stderr output, including the progress line. Mutually exclusive with `--progress`. | *(off)* |
+
+### Progress output
+
+A scan over a large CIDR range (a `/24` or `/16`) prints nothing on stdout until
+every host has been probed. To show that the scan is alive, hellhound writes a
+single, self-rewriting progress line to **stderr** as each host completes:
+
+```
+hellhound: 142/254 hosts scanned, 3 with default creds
+```
+
+The line auto-enables when stderr is an interactive terminal and stays silent
+when output is piped or redirected, so machine consumers never see it. Force it
+on (even when redirected) with `--progress`, or turn off all stderr chatter with
+`--quiet`. Because progress goes to stderr, stdout remains a clean JSON / CSV /
+SARIF stream you can pipe or save:
+
+```bash
+# live progress in the terminal, clean JSON saved to disk
+hellhound --target 10.0.0.0/24 --progress --output-file findings.json
+
+# fully silent on stderr (e.g. inside a cron job)
+hellhound --target 10.0.0.0/24 --quiet > findings.json
+```
 
 ### Output
 
