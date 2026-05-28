@@ -268,6 +268,19 @@ def build_parser() -> argparse.ArgumentParser:
         "credentials. Suppresses matched-but-rotated findings to cut noise "
         "on large sweeps. Summary counts still reflect all matches.",
     )
+    parser.add_argument(
+        "--exit-code",
+        type=int,
+        default=0,
+        metavar="N",
+        help="Exit with code N when one or more confirmed default-credential "
+        "exposures are found (default: 0, i.e. always exit 0 on a successful "
+        "scan, the original behaviour). Set to a non-zero value (e.g. 1) to "
+        "fail CI/CD pipelines or scripts when hellhound finds an exposed "
+        "device: `hellhound -t 10.0.0.0/24 --exit-code 1 || alert`. Output is "
+        "unchanged; only the process exit status is affected. Argument errors, "
+        "bad input, and I/O failures still exit 2 regardless.",
+    )
     progress_group = parser.add_mutually_exclusive_group()
     progress_group.add_argument(
         "--progress",
@@ -523,6 +536,28 @@ def make_progress_callback(stream: TextIO | None = None):
     return callback
 
 
+def resolve_exit_code(findings: list[Finding], exit_code_when_found: int) -> int:
+    """Decide the process exit code for a completed scan.
+
+    Returns ``exit_code_when_found`` when at least one finding has confirmed
+    default credentials (``default_creds is True``) and the operator opted into
+    findings-based exit status (a non-zero ``exit_code_when_found``). Otherwise
+    returns ``0``.
+
+    The default of ``0`` preserves hellhound's original contract — a successful
+    scan always exits 0 regardless of what it found. Passing a non-zero value
+    turns a confirmed exposure into a non-zero exit so the tool can gate a CI/CD
+    pipeline or a shell script. This decision is intentionally independent of
+    ``--only-vulnerable`` (which only filters *displayed* findings, not the
+    underlying match set) so the exit signal is stable across output modes.
+    """
+    if exit_code_when_found == 0:
+        return 0
+    if any(f.default_creds for f in findings):
+        return exit_code_when_found
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -605,7 +640,7 @@ def main(argv: list[str] | None = None) -> int:
                 findings, args.format, only_vulnerable=args.only_vulnerable
             )
         )
-        return 0
+        return resolve_exit_code(findings, args.exit_code)
 
     try:
         # newline="" lets the csv module control line terminators (avoids the
@@ -620,7 +655,7 @@ def main(argv: list[str] | None = None) -> int:
     except OSError as exc:
         print(f"error: could not write output file: {exc}", file=sys.stderr)
         return 2
-    return 0
+    return resolve_exit_code(findings, args.exit_code)
 
 
 if __name__ == "__main__":  # pragma: no cover

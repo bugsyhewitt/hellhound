@@ -90,6 +90,7 @@ Key options:
 | `--exclude`, `-e` | Exclude a CIDR or IP from scanning. Repeatable. | *(none)* |
 | `--exclude-file` | Path to a file of CIDR/IP exclusions (one per line, `#` comments). | *(none)* |
 | `--only-vulnerable` | Digest mode: report only findings with confirmed default credentials. Summary counts stay full. | *(off)* |
+| `--exit-code` | Exit with this code when a confirmed default-credential exposure is found (`0` = always exit 0 on a successful scan). Use a non-zero value to fail CI/CD or scripts. | `0` |
 | `--progress` | Emit a live progress line to stderr (hosts scanned / total, findings so far). Auto-on when stderr is a TTY. | *(auto)* |
 | `--quiet`, `-q` | Suppress all stderr output, including the progress line. Mutually exclusive with `--progress`. | *(off)* |
 
@@ -289,6 +290,40 @@ A SARIF document looks like:
   ]
 }
 ```
+
+### Exit codes and CI/CD gating
+
+By default a successful scan always exits `0`, whether or not it found anything —
+hellhound's job is to *report*, and the findings are in the output. That makes it
+awkward to drop into a pipeline, where you usually want a non-zero status to fail
+the build when an exposed device turns up.
+
+`--exit-code N` opts into findings-based exit status: when at least one finding
+has confirmed default credentials, hellhound exits with code `N` instead of `0`.
+The output is identical; only the process exit status changes.
+
+```bash
+# fail the pipeline (exit 1) if any device on the range still has default creds
+hellhound --target 10.0.0.0/24 --exit-code 1 --output-file findings.json
+
+# shell gating
+if ! hellhound --target 10.0.0.0/24 --exit-code 1 --quiet > findings.json; then
+  echo "default-credential exposure found — see findings.json"
+fi
+```
+
+The signal is the confirmed-exposure set (`default_creds: true`). Matched-but-
+rotated devices do not trip it, and it is independent of `--only-vulnerable`
+(which only filters *displayed* findings, not the underlying match set), so the
+exit code is stable across output modes. Input/usage errors and I/O failures
+still exit `2` regardless of `--exit-code`. The standard scanner exit conventions
+hold:
+
+| Exit code | Meaning |
+|---|---|
+| `0` | Scan completed; no exposure found, **or** `--exit-code` left at its `0` default |
+| `N` (e.g. `1`) | Scan completed and a confirmed default-credential exposure was found (only when `--exit-code N` is set) |
+| `2` | Argument, input, or I/O error (unknown fingerprint set, bad ports, unwritable output file, …) |
 
 ### Exclusions
 
