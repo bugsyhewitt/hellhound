@@ -191,7 +191,19 @@ operators control without requiring them to reason about concurrency.
 
 ---
 
-### 9. Plugin / external fingerprint directory support (`--fingerprint-dir`)
+### 9. Plugin / external fingerprint directory support (`--fingerprint-dir`) — ✅ IMPLEMENTED (Phase 2, Rotation 10)
+
+**Status:** Done. Added `--fingerprint-dir PATH` to the CLI. New
+`load_fingerprint_set_with_dir(name, fingerprint_dir=...)` in
+`hellhound/fingerprint.py` always loads the bundled set as the base, then merges
+a user `<set>.yaml` on top via a new `merge_fingerprints(bundled, overrides)`
+helper: custom entries override bundled ones by `id` in place, new ids are
+appended, bundled-only entries are preserved (bundled order kept). A missing
+directory or a directory without the named `<set>.yaml` raises FileNotFoundError,
+which `main()` reports as a clean exit-2 error. 12 unit tests in
+`tests/test_fingerprint_dir.py` (merge semantics, loader behaviour, CLI parsing,
+error path); README documents the flag with a custom-directory example. No engine
+changes.
 
 **Why ninth:** Power users want to maintain a private fingerprint set for
 proprietary or unreleased devices alongside the bundled `default.yaml` without

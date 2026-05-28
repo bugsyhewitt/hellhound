@@ -220,3 +220,67 @@ def load_fingerprint_set(name: str, *, directory: Path | None = None) -> list[Fi
     with path.open("r", encoding="utf-8") as fh:
         data = yaml.safe_load(fh) or {}
     return load_fingerprints_from_dict(data)
+
+
+def merge_fingerprints(
+    bundled: list[Fingerprint],
+    overrides: list[Fingerprint],
+) -> list[Fingerprint]:
+    """Merge a user *overrides* set on top of the *bundled* set, keyed by id.
+
+    Merge semantics (per POST_V01 item 9):
+
+    - A fingerprint in *overrides* whose ``id`` matches a bundled entry
+      *replaces* that bundled entry in place (so an operator can correct or
+      retune a shipped fingerprint without forking the database).
+    - A fingerprint in *overrides* with an ``id`` not present in the bundled
+      set is *appended* after the bundled entries.
+    - Bundled-only entries are preserved.
+
+    Bundled ordering is preserved; new override entries follow in the order
+    they appear in the user directory.
+    """
+    by_id: dict[str, Fingerprint] = {fp.id: fp for fp in overrides}
+    merged: list[Fingerprint] = []
+    seen: set[str] = set()
+    for fp in bundled:
+        merged.append(by_id.get(fp.id, fp))
+        seen.add(fp.id)
+    for fp in overrides:
+        if fp.id not in seen:
+            merged.append(fp)
+            seen.add(fp.id)
+    return merged
+
+
+def load_fingerprint_set_with_dir(
+    name: str,
+    *,
+    fingerprint_dir: Path | None = None,
+) -> list[Fingerprint]:
+    """Load the bundled *name* set, optionally merged with a user directory.
+
+    The bundled fingerprints under :data:`FINGERPRINTS_DIR` are always loaded
+    as the base. When *fingerprint_dir* is provided and contains
+    ``{name}.yaml``, that file is loaded and merged on top using
+    :func:`merge_fingerprints` (user entries override bundled ones by ``id``;
+    the rest are appended). This lets power users maintain a private fingerprint
+    set alongside the shipped database without patching hellhound.
+
+    Raises FileNotFoundError if the bundled set does not exist, or if a
+    *fingerprint_dir* is given but does not exist / contains no ``{name}.yaml``.
+    """
+    bundled = load_fingerprint_set(name)
+    if fingerprint_dir is None:
+        return bundled
+
+    fingerprint_dir = Path(fingerprint_dir)
+    if not fingerprint_dir.is_dir():
+        raise FileNotFoundError(f"fingerprint directory not found: {fingerprint_dir}")
+    user_path = fingerprint_dir / f"{name}.yaml"
+    if not user_path.is_file():
+        raise FileNotFoundError(
+            f"no '{name}.yaml' in fingerprint directory: {fingerprint_dir}"
+        )
+    overrides = load_fingerprint_set(name, directory=fingerprint_dir)
+    return merge_fingerprints(bundled, overrides)
