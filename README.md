@@ -79,7 +79,7 @@ Key options:
 | `--target`, `-t` | CIDR range or single IP/host. Repeat for multiple targets. | *(required)* |
 | `--ports`, `-p` | Comma-separated ports to probe. | `80,443,8080,8443` |
 | `--fingerprint-set`, `-f` | Name of the fingerprint set under `hellhound/fingerprints/`. | `default` |
-| `--format` | `json`, `text`, or `csv`. | `json` |
+| `--format` | `json`, `text`, `csv`, or `sarif`. | `json` |
 | `--output-file`, `-o` | Write output to this path instead of stdout. | *(stdout)* |
 | `--timeout` | Per-request timeout (seconds). | `5.0` |
 | `--concurrency` | Max concurrent requests. | `50` |
@@ -162,6 +162,62 @@ Digest mode works with every format (`json`, `text`, `csv`) and composes with
 
 ```bash
 hellhound --target 10.0.0.0/16 --only-vulnerable --format csv --output-file exposed.csv
+```
+
+#### SARIF output (`--format sarif`)
+
+For CI/CD pipelines and GitHub code scanning, `--format sarif` emits a SARIF
+2.1.0 document — the OASIS-standard format accepted by GitHub Advanced
+Security, GitLab, Harness, and most enterprise scanners. SARIF reports
+vulnerabilities only: hellhound emits one `result` per device with confirmed
+default credentials (matched-but-rotated findings are not exposures and are
+omitted), maps each finding's severity onto the SARIF `level` vocabulary
+(`critical`/`high` → `error`, `medium` → `warning`, otherwise `note`), encodes
+the host/port as a location URI, and carries any associated CVEs as result
+tags.
+
+```bash
+hellhound --target 192.0.2.0/24 --format sarif --output-file hellhound.sarif
+```
+
+Upload the artefact to GitHub code scanning from a workflow step:
+
+```yaml
+- name: Upload hellhound SARIF
+  uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: hellhound.sarif
+```
+
+A SARIF document looks like:
+
+```json
+{
+  "version": "2.1.0",
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "hellhound",
+          "rules": [
+            { "id": "hikvision-dvr", "name": "Hikvision default credentials", "...": "..." }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "hikvision-dvr",
+          "level": "error",
+          "message": { "text": "matched Hikvision via title/body; default creds admin:12345 authenticated" },
+          "locations": [
+            { "physicalLocation": { "artifactLocation": { "uri": "http://192.0.2.10:80/" } } }
+          ]
+        }
+      ]
+    }
+  ]
+}
 ```
 
 ### Exclusions

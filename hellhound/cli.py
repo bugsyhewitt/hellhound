@@ -93,9 +93,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--format",
-        choices=["json", "text", "csv"],
+        choices=["json", "text", "csv", "sarif"],
         default="json",
-        help="Output format (default: json).",
+        help="Output format (default: json). 'sarif' emits a SARIF 2.1.0 "
+        "document for upload to GitHub code scanning and other SARIF consumers.",
     )
     parser.add_argument(
         "--output-file",
@@ -160,6 +161,101 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+SARIF_VERSION = "2.1.0"
+SARIF_SCHEMA = (
+    "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/"
+    "Schemata/sarif-schema-2.1.0.json"
+)
+
+# Map hellhound severities onto the SARIF result level vocabulary.
+# critical/high are actionable failures (error); medium is a warning; anything
+# else (low/info/unknown) is a note.
+_SARIF_LEVEL = {
+    "critical": "error",
+    "high": "error",
+    "medium": "warning",
+    "low": "note",
+}
+
+
+def _sarif_level(severity: str) -> str:
+    return _SARIF_LEVEL.get((severity or "").lower(), "note")
+
+
+def format_sarif(findings: list[Finding]) -> str:
+    """Render findings as a SARIF 2.1.0 document.
+
+    SARIF (Static Analysis Results Interchange Format) 2.1.0 is the OASIS
+    standard accepted by GitHub code scanning, GitLab, and most enterprise
+    security platforms. hellhound emits one ``result`` per finding with
+    confirmed default credentials (``default_creds is True``) — these are the
+    actionable exposures a SARIF consumer cares about. Matched-but-rotated
+    findings are not vulnerabilities and are intentionally omitted.
+
+    Each result encodes the device host/port as a location URI, maps the
+    fingerprint severity onto the SARIF ``level`` vocabulary, and carries the
+    associated CVE identifiers as result tags.
+    """
+    flagged = [f for f in findings if f.default_creds]
+
+    # Build a stable rule per distinct fingerprint so SARIF consumers can group
+    # results and surface a description.
+    rules: list[dict] = []
+    rule_index: dict[str, int] = {}
+    for f in flagged:
+        if f.fingerprint_id in rule_index:
+            continue
+        rule_index[f.fingerprint_id] = len(rules)
+        rules.append(
+            {
+                "id": f.fingerprint_id,
+                "name": f"{f.vendor} default credentials",
+                "shortDescription": {
+                    "text": f"{f.vendor} {f.model_class} accepts factory-default credentials"
+                },
+                "defaultConfiguration": {"level": _sarif_level(f.severity)},
+            }
+        )
+
+    results: list[dict] = []
+    for f in flagged:
+        result: dict = {
+            "ruleId": f.fingerprint_id,
+            "ruleIndex": rule_index[f.fingerprint_id],
+            "level": _sarif_level(f.severity),
+            "message": {"text": f.evidence},
+            "locations": [
+                {
+                    "physicalLocation": {
+                        "artifactLocation": {"uri": f"{f.scheme}://{f.host}:{f.port}/"}
+                    }
+                }
+            ],
+        }
+        if f.cve:
+            result["properties"] = {"cve": list(f.cve), "tags": list(f.cve)}
+        results.append(result)
+
+    document = {
+        "version": SARIF_VERSION,
+        "$schema": SARIF_SCHEMA,
+        "runs": [
+            {
+                "tool": {
+                    "driver": {
+                        "name": "hellhound",
+                        "informationUri": "https://github.com/bugsyhewitt/hellhound",
+                        "version": __version__,
+                        "rules": rules,
+                    }
+                },
+                "results": results,
+            }
+        ],
+    }
+    return json.dumps(document, indent=2)
+
+
 def _render(findings: list[Finding], fmt: str, only_vulnerable: bool = False) -> str:
     """Render findings to a string in the requested format.
 
@@ -171,6 +267,11 @@ def _render(findings: list[Finding], fmt: str, only_vulnerable: bool = False) ->
     flagged = [f for f in findings if f.default_creds]
     # The displayed findings are the digest subset when requested.
     shown = flagged if only_vulnerable else findings
+    if fmt == "sarif":
+        # SARIF reports vulnerabilities only; --only-vulnerable is implied and
+        # the (verbose) hellhound summary block has no SARIF equivalent.
+        return format_sarif(findings)
+
     if fmt == "json":
         payload = {
             "summary": {
