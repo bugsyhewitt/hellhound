@@ -190,6 +190,8 @@ fingerprints:
     model_class: DVR / IP Camera
     severity: high
     description: AVTECH DVRs and cameras default to admin/admin.
+    cve:
+      - CVE-2024-7921
     match:
       path: /
       body_contains: "/cgi-bin/nobody/Machine.cgi"
@@ -242,6 +244,8 @@ fingerprints:
     description: >-
       HPE Aruba Instant On access points (firmware <= 3.2.0.1) ship with a
       hardcoded admin/default123 backdoor (CVE-2025-37103).
+    cve:
+      - CVE-2025-37103
     match:
       path: /
       body_contains: "Instant On"
@@ -363,6 +367,9 @@ fingerprints:
     description: >-
       GeoVision DVRs default to admin/admin and are actively targeted by Mirai
       via CVE-2024-6047 / CVE-2024-11120.
+    cve:
+      - CVE-2024-6047
+      - CVE-2024-11120
     match:
       path: /
       http_title: GeoVision

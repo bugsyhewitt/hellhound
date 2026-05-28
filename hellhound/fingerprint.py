@@ -132,6 +132,7 @@ class Fingerprint:
     credentials: list[Credential]
     auth: AuthCheck
     description: str = ""
+    cve: tuple[str, ...] = ()
 
 
 def _build_match(raw: dict) -> MatchCriteria:
@@ -174,6 +175,19 @@ def _build_credentials(raw_list: list) -> list[Credential]:
     return creds
 
 
+def _build_cve(raw: object) -> tuple[str, ...]:
+    """Normalise a fingerprint's optional ``cve`` field into a tuple of strings.
+
+    Accepts a list of strings, a single string, or absence (``None``). Blank
+    entries are dropped so a stray empty string never appears in output.
+    """
+    if not raw:
+        return ()
+    if isinstance(raw, str):
+        raw = [raw]
+    return tuple(str(c).strip() for c in raw if str(c).strip())
+
+
 def load_fingerprints_from_dict(data: dict) -> list[Fingerprint]:
     """Build Fingerprint objects from an already-parsed YAML mapping."""
     fingerprints: list[Fingerprint] = []
@@ -188,6 +202,7 @@ def load_fingerprints_from_dict(data: dict) -> list[Fingerprint]:
                 credentials=_build_credentials(raw.get("default_credentials", [])),
                 auth=_build_auth(raw.get("auth", {})),
                 description=raw.get("description", ""),
+                cve=_build_cve(raw.get("cve")),
             )
         )
     return fingerprints

@@ -110,6 +110,7 @@ JSON output groups a summary with per-device findings:
       "severity": "critical",
       "default_creds": true,
       "matched_credential": { "username": "admin", "password": "12345" },
+      "cve": [],
       "evidence": "matched Hikvision via title/body; default creds admin:12345 authenticated at /ISAPI/Security/userCheck"
     }
   ]
@@ -118,6 +119,12 @@ JSON output groups a summary with per-device findings:
 
 A finding with `"default_creds": true` is the actionable result: that device
 still accepts the listed default credentials and should be reconfigured.
+
+Each finding also carries a `cve` list. When the matched fingerprint is linked
+to one or more published CVEs (for example HPE Aruba Instant On
+`CVE-2025-37103` or GeoVision `CVE-2024-6047`), they appear here so the finding
+can be communicated to the asset owner with an authoritative reference. For
+fingerprints with no associated CVE the list is empty.
 
 #### Digest mode (`--only-vulnerable`)
 
@@ -208,14 +215,18 @@ to the file. `--output-file` works with any format (`json`, `text`, or `csv`).
 The CSV has a header row followed by one row per matched device. Columns:
 
 ```csv
-host,port,scheme,vendor,model_class,severity,fingerprint_id,default_creds,username,password,evidence
-192.0.2.10,80,http,Hikvision,DVR / NVR / IP Camera,critical,hikvision-dvr,true,admin,12345,matched Hikvision via title/body; default creds admin:12345 authenticated at /ISAPI/Security/userCheck
-192.0.2.11,443,https,Dahua,NVR,high,dahua-nvr,false,,,matched Dahua fingerprint; default credentials rejected
+host,port,scheme,vendor,model_class,severity,fingerprint_id,default_creds,username,password,cve,evidence
+192.0.2.10,80,http,Hikvision,DVR / NVR / IP Camera,critical,hikvision-dvr,true,admin,12345,,matched Hikvision via title/body; default creds admin:12345 authenticated at /ISAPI/Security/userCheck
+192.0.2.20,443,https,HPE Aruba,Enterprise access point,critical,aruba-instant-on,true,admin,default123,CVE-2025-37103,default creds authenticated
+192.0.2.11,443,https,Dahua,NVR,high,dahua-nvr,false,,,,matched Dahua fingerprint; default credentials rejected
 ```
 
 `default_creds` is `true`/`false`. For devices whose default credentials were
 rejected (`default_creds` is `false`), the `username` and `password` cells are
-empty.
+empty. The `cve` column lists any CVEs linked to the matched fingerprint,
+semicolon-separated when there is more than one (e.g.
+`CVE-2024-6047;CVE-2024-11120`); it is empty when the fingerprint has no
+associated CVE.
 
 ---
 
@@ -240,6 +251,8 @@ fingerprints:
     model_class: DVR / NVR / IP Camera   # device class
     severity: critical           # low | medium | high | critical
     description: optional human-readable note
+    cve:                         # optional list of related CVE IDs
+      - CVE-2025-37103
     match:                       # how to recognise the device (AND semantics)
       path: /                    # page to fetch for matching (default /)
       http_title: Hikvision      # case-insensitive substring of <title>  (optional)
@@ -263,6 +276,9 @@ fingerprints:
 
 Matching rules:
 
+- `cve` is optional: a list of CVE IDs (or a single string) linking the device
+  class to published advisories. It is surfaced on every finding for that
+  fingerprint, across all output formats, and defaults to empty when omitted.
 - A `match` block uses **AND semantics** — every field you specify must match.
 - At least one of `http_title`, `body_contains`, or `header_contains` is
   required; an entry with no positive condition never matches (so a malformed
