@@ -132,7 +132,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 72 fingerprint(s) loaded
+hellhound: 80 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -496,7 +496,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 72 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 80 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -539,7 +539,14 @@ across the 2024-2025 CISA KEV / ransomware landscape: Progress WhatsUp Gold
 (CVE-2024-6670 / CVE-2024-4885), Apache Struts 2 (CVE-2024-53677), Palo Alto
 PAN-OS GlobalProtect (CVE-2024-3400), Ivanti Avalanche (CVE-2023-32560), VMware
 vCenter Server (CVE-2024-38812), CrushFTP (CVE-2024-4040), CyberPanel
-(CVE-2024-51378), and Array Networks AG/vxAG SSL VPN (CVE-2023-28461).
+(CVE-2024-51378), and Array Networks AG/vxAG SSL VPN (CVE-2023-28461). A ninth
+tranche covers internet-facing enterprise appliances, NAS devices, file servers
+and web platforms mass-exploited across the 2024-2025 CISA KEV / ransomware
+landscape: Fortinet FortiManager (CVE-2024-47575, "FortiJump"), Sophos Firewall
+(CVE-2022-1040), D-Link DNS-series NAS (CVE-2024-3273), Progress Kemp LoadMaster
+(CVE-2024-1212), Synacor Zimbra Collaboration (CVE-2024-45519), Rejetto HTTP
+File Server (CVE-2024-23692), GitLab Community Edition (CVE-2023-7028), and
+NextGen Mirth Connect (CVE-2023-43208).
 
 Each file has a top-level `fingerprints` list. An entry:
 
