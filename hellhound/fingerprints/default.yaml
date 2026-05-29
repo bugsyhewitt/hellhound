@@ -1630,3 +1630,194 @@ fingerprints:
       path: /api/users/_login
       username_field: username
       password_field: password
+
+  # --- Phase 2 expansion (tenth tranche): internet-facing enterprise
+  # appliances, gateways and management consoles mass-exploited across the
+  # 2023-2025 CISA KEV / ransomware landscape (Ivanti EPMM/MobileIron, ownCloud,
+  # Acronis Cyber Infrastructure, Qlik Sense, Zyxel NAS, HPE OneView, Commvault
+  # Command Center, SysAid). Recognised from their web login / admin surface,
+  # with the documented default web-admin credentials checked. None of these
+  # device classes were covered by tranches 1-9. Default credentials verified
+  # from vendor documentation and public advisories. ---
+
+  - id: ivanti-epmm
+    vendor: Ivanti
+    model_class: Endpoint Manager Mobile (MobileIron Core)
+    severity: critical
+    description: >-
+      Ivanti Endpoint Manager Mobile (formerly MobileIron Core) is an
+      internet-facing mobile-device-management gateway mass-exploited in
+      2023-2024 via an authentication-bypass chain (CVE-2023-35078, CISA KEV).
+      Default deployments ship the documented admin account on the admin portal.
+    cve:
+      - CVE-2023-35078
+    match:
+      path: /
+      body_contains: "MobileIron"
+    default_credentials:
+      - {username: admin, password: changeme}
+    auth:
+      type: form
+      path: /mifs/j_spring_security_check
+      username_field: j_username
+      password_field: j_password
+      failure_body_contains: "error"
+
+  - id: owncloud-server
+    vendor: ownCloud
+    model_class: ownCloud file-sync server
+    severity: high
+    description: >-
+      ownCloud is an internet-facing enterprise file-sync-and-share server whose
+      graphapi component leaked environment secrets and was mass-exploited in
+      late 2023 (CVE-2023-49103, CISA KEV). Fresh installs expose the documented
+      admin account on the web login.
+    cve:
+      - CVE-2023-49103
+    match:
+      path: /
+      body_contains: "ownCloud"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /index.php/login
+      username_field: user
+      password_field: password
+      failure_body_contains: "wrong"
+
+  - id: acronis-cyber-infrastructure
+    vendor: Acronis
+    model_class: Cyber Infrastructure / Cyber Protect appliance
+    severity: critical
+    description: >-
+      Acronis Cyber Infrastructure is an internet-facing backup and storage
+      appliance mass-exploited in 2023-2024 via a default-credential flaw that
+      let attackers reach the management API (CVE-2023-45249, CISA KEV).
+      Affected deployments ship the documented root console account.
+    cve:
+      - CVE-2023-45249
+    match:
+      path: /
+      body_contains: "Acronis Cyber"
+    default_credentials:
+      - {username: root, password: default}
+    auth:
+      type: form
+      path: /api/v2/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "error"
+
+  - id: qlik-sense
+    vendor: Qlik
+    model_class: Qlik Sense Enterprise analytics server
+    severity: high
+    description: >-
+      Qlik Sense Enterprise is an internet-facing business-analytics server
+      mass-exploited in 2023-2024 via an unauthenticated path-traversal RCE
+      chain (CVE-2023-48365, CISA KEV). Default installs expose the documented
+      administrator account on the management console.
+    cve:
+      - CVE-2023-48365
+    match:
+      path: /
+      body_contains: "Qlik Sense"
+    default_credentials:
+      - {username: administrator, password: administrator}
+    auth:
+      type: form
+      path: /internal_forms_authentication/
+      username_field: username
+      password_field: pwd
+      failure_body_contains: "failed"
+
+  - id: zyxel-nas
+    vendor: Zyxel
+    model_class: Zyxel NAS storage appliance
+    severity: critical
+    description: >-
+      Zyxel NAS devices are internet-facing storage appliances mass-exploited in
+      2023-2024 via an authentication-bypass / command-injection chain
+      (CVE-2023-27992, CISA KEV). Affected units ship the documented admin
+      account on the web administration interface.
+    cve:
+      - CVE-2023-27992
+    match:
+      path: /
+      body_contains: "NAS Login"
+    default_credentials:
+      - {username: admin, password: "1234"}
+    auth:
+      type: form
+      path: /cgi-bin/login.cgi
+      username_field: username
+      password_field: password
+      failure_body_contains: "error"
+
+  - id: hpe-oneview
+    vendor: HPE
+    model_class: OneView infrastructure management console
+    severity: high
+    description: >-
+      HPE OneView is an internet-facing data-centre infrastructure management
+      console. Default appliance deployments ship the documented Administrator
+      account with a known factory password on the web login, exposing full
+      control of managed servers and storage if left unrotated.
+    match:
+      path: /
+      body_contains: "HPE OneView"
+    default_credentials:
+      - {username: Administrator, password: admin}
+    auth:
+      type: form
+      path: /rest/login-sessions
+      username_field: userName
+      password_field: password
+      failure_body_contains: "error"
+
+  - id: commvault-command-center
+    vendor: Commvault
+    model_class: Command Center backup console
+    severity: critical
+    description: >-
+      Commvault Command Center is an internet-facing enterprise backup and
+      data-management console mass-exploited in 2024-2025 via an unauthenticated
+      install-package upload RCE (CVE-2025-34028, CISA KEV). Default deployments
+      expose the documented admin account on the web console.
+    cve:
+      - CVE-2025-34028
+    match:
+      path: /
+      body_contains: "Command Center"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /commandcenter/api/Login
+      username_field: username
+      password_field: password
+      failure_body_contains: "error"
+
+  - id: sysaid-server
+    vendor: SysAid
+    model_class: SysAid IT service-management server
+    severity: critical
+    description: >-
+      SysAid is an internet-facing IT service-management (helpdesk) server
+      mass-exploited in 2023-2025 via a path-traversal flaw used to drop
+      webshells (CVE-2023-47246, CISA KEV). Default on-premises installs ship the
+      documented administrator account on the web login.
+    cve:
+      - CVE-2023-47246
+    match:
+      path: /
+      body_contains: "SysAid"
+    default_credentials:
+      - {username: administrator, password: administrator}
+    auth:
+      type: form
+      path: /enteradmin.htm
+      username_field: userName
+      password_field: password
+      failure_body_contains: "error"
