@@ -2769,3 +2769,200 @@ fingerprints:
       username_field: txtUsername
       password_field: txtPassword
       failure_body_contains: "invalid"
+
+  - id: fortinet-fortivoice
+    vendor: Fortinet
+    model_class: Fortinet FortiVoice unified-communications web admin
+    severity: critical
+    description: >-
+      Fortinet FortiVoice (and the shared FortiMail / FortiNDR / FortiRecorder
+      code path) exposes an internet-facing administrative web interface
+      mass-exploited in the wild via a stack-based buffer-overflow that yields
+      unauthenticated remote code execution (CVE-2025-32756, CISA KEV). Default
+      and lab appliances retain the documented admin account on the FortiVoice
+      GUI login.
+    cve:
+      - CVE-2025-32756
+    match:
+      path: /
+      body_contains: "FortiVoice"
+    default_credentials:
+      - {username: admin, password: ""}
+    auth:
+      type: form
+      path: /api/v1/AdminLogin
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: sap-netweaver
+    vendor: SAP
+    model_class: SAP NetWeaver Visual Composer (Java) web console
+    severity: critical
+    description: >-
+      SAP NetWeaver's Visual Composer Metadata Uploader exposes an
+      internet-facing endpoint mass-exploited via an unauthenticated
+      file-upload flaw that drops a JSP webshell for remote code execution
+      (CVE-2025-31324, CISA KEV). Default Java application-server installs
+      retain the documented administrator account on the NetWeaver portal
+      login.
+    cve:
+      - CVE-2025-31324
+    match:
+      path: /
+      body_contains: "SAP NetWeaver"
+    default_credentials:
+      - {username: Administrator, password: welcome}
+    auth:
+      type: form
+      path: /irj/portal
+      username_field: j_user
+      password_field: j_password
+      failure_body_contains: "incorrect"
+
+  - id: sitecore-cms
+    vendor: Sitecore
+    model_class: Sitecore Experience Platform CMS admin console
+    severity: critical
+    description: >-
+      Sitecore Experience Platform / Experience Manager exposes an
+      internet-facing content-management admin console exploited in the wild
+      via an authentication / hard-coded-credential and deserialization chain
+      yielding remote code execution (CVE-2025-34509 / CVE-2025-27218, CISA
+      KEV). Default installs retain the documented admin account on the
+      Sitecore login page.
+    cve:
+      - CVE-2025-34509
+      - CVE-2025-27218
+    match:
+      path: /
+      body_contains: "Sitecore"
+    default_credentials:
+      - {username: admin, password: b}
+    auth:
+      type: form
+      path: /sitecore/login
+      username_field: UserName
+      password_field: Password
+      failure_body_contains: "incorrect"
+
+  - id: wazuh-server
+    vendor: Wazuh
+    model_class: Wazuh security platform dashboard / API
+    severity: critical
+    description: >-
+      The Wazuh open-source SIEM server exposes an internet-facing management
+      API mass-exploited by Mirai-variant botnets via an unsafe-deserialization
+      remote-code-execution flaw in the DistributedAPI (CVE-2025-24016, CISA
+      KEV). Default deployments retain the documented Wazuh dashboard
+      administrator account on the login.
+    cve:
+      - CVE-2025-24016
+    match:
+      path: /
+      body_contains: "Wazuh"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /security/user/authenticate
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: craft-cms
+    vendor: Craft CMS
+    model_class: Craft CMS control panel (Yii / PHP)
+    severity: critical
+    description: >-
+      Craft CMS exposes an internet-facing control panel exploited in the wild
+      via a remote-code-execution chain abusing the asset-transform / Twig
+      handling (CVE-2025-23209, CISA KEV) on installs with a compromised
+      security key. Default and lab installs retain the documented admin
+      account on the Craft control-panel login.
+    cve:
+      - CVE-2025-23209
+    match:
+      path: /
+      body_contains: "Craft CMS"
+    default_credentials:
+      - {username: admin, password: password}
+    auth:
+      type: form
+      path: /admin/login
+      username_field: loginName
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: gladinet-centrestack
+    vendor: Gladinet
+    model_class: Gladinet CentreStack / Triofox file-sharing portal
+    severity: critical
+    description: >-
+      Gladinet CentreStack (and the shared Triofox code path) exposes an
+      internet-facing file-sharing portal mass-exploited via a hard-coded
+      machineKey ViewState deserialization flaw yielding unauthenticated
+      remote code execution (CVE-2025-30406, CISA KEV). Default installs retain
+      the documented admin account on the CentreStack portal login.
+    cve:
+      - CVE-2025-30406
+    match:
+      path: /
+      body_contains: "CentreStack"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /Storage/StorageLogin.aspx
+      username_field: email
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: ivanti-epm
+    vendor: Ivanti
+    model_class: Ivanti Endpoint Manager (EPM) web console
+    severity: critical
+    description: >-
+      Ivanti Endpoint Manager (EPM, formerly LANDESK) exposes an
+      internet-facing management web console exploited in the wild via an
+      absolute-path-traversal flaw allowing credential coercion and remote code
+      execution (CVE-2024-29824, CISA KEV). Distinct from the bundled Ivanti
+      EPMM / MobileIron Core and Ivanti Sentry entries. Default installs retain
+      the documented admin account on the EPM console login.
+    cve:
+      - CVE-2024-29824
+    match:
+      path: /
+      body_contains: "Ivanti Endpoint Manager"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /mvc/account/login
+      username_field: UserName
+      password_field: Password
+      failure_body_contains: "invalid"
+
+  - id: mitel-sip-phone
+    vendor: Mitel
+    model_class: Mitel 6800 / 6900 SIP desk-phone web UI
+    severity: high
+    description: >-
+      Mitel 6800 / 6900-series SIP desk phones expose an internet-facing web
+      management UI exploited via a path-traversal flaw that discloses
+      sensitive provisioning data without authentication (CVE-2024-41710, CISA
+      KEV). Distinct from the bundled Mitel MiCollab entry. Default phones
+      retain the documented admin account on the phone web login.
+    cve:
+      - CVE-2024-41710
+    match:
+      path: /
+      body_contains: "Mitel"
+    default_credentials:
+      - {username: admin, password: "22222"}
+    auth:
+      type: form
+      path: /cgi-bin/login.cgi
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
