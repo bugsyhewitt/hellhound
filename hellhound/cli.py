@@ -18,7 +18,10 @@ import sys
 from typing import TextIO
 
 from . import __version__
-from .fingerprint import load_fingerprint_set_with_dir
+from .fingerprint import (
+    load_fingerprint_set_with_dir,
+    validate_fingerprints,
+)
 from .scanner import Finding, Scanner, ScanProgress
 
 DEFAULT_PORTS = "80,443,8080,8443"
@@ -194,6 +197,18 @@ def build_parser() -> argparse.ArgumentParser:
         "(json/text/csv) and --output-file. Use it to audit device-class, "
         "vendor, severity and CVE coverage, or to verify a custom set merged "
         "correctly. No target is required in this mode.",
+    )
+    parser.add_argument(
+        "--validate",
+        action="store_true",
+        default=False,
+        help="Validate the loaded fingerprint database (after any "
+        "--fingerprint-dir merge) for structural integrity — duplicate ids, "
+        "invalid severities or auth types, fingerprints that can never match, "
+        "and entries with no default credentials — then exit without scanning. "
+        "Exits 0 if the set is valid, 2 (printing every problem) if not. Use it "
+        "in CI to gate a custom fingerprint set, or to sanity-check the bundled "
+        "database. No target is required in this mode.",
     )
     parser.add_argument(
         "--format",
@@ -576,6 +591,28 @@ def main(argv: list[str] | None = None) -> int:
     except FileNotFoundError as exc:
         print(f"error: unknown fingerprint set: {exc}", file=sys.stderr)
         return 2
+
+    # Validate mode: check the effective (post-merge) fingerprint set for
+    # structural integrity and exit. No target or network access required. This
+    # is the natural CI gate for a custom --fingerprint-dir set — and a
+    # sanity-check on the bundled database — answering "is what I'm about to
+    # scan with well-formed?" offline.
+    if args.validate:
+        errors = validate_fingerprints(fingerprints)
+        if errors:
+            print(
+                f"error: fingerprint set '{args.fingerprint_set}' failed "
+                f"validation ({len(errors)} problem(s)):",
+                file=sys.stderr,
+            )
+            for err in errors:
+                print(f"  - {err}", file=sys.stderr)
+            return 2
+        print(
+            f"ok: fingerprint set '{args.fingerprint_set}' is valid "
+            f"({len(fingerprints)} fingerprint(s))"
+        )
+        return 0
 
     # Inventory mode: print the loaded fingerprint database and exit. No target
     # or network access required — this honours --fingerprint-dir merges so an

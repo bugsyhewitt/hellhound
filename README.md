@@ -81,6 +81,7 @@ Key options:
 | `--fingerprint-set`, `-f` | Name of the fingerprint set under `hellhound/fingerprints/`. | `default` |
 | `--fingerprint-dir` | Directory holding a custom `<set>.yaml`. Custom entries override bundled ones by `id`; the rest are appended. | *(none)* |
 | `--list-fingerprints` | Inventory mode: print the loaded fingerprint database (after any `--fingerprint-dir` merge) and exit without scanning. Honours `--format` and `--output-file`; no target required. | *(off)* |
+| `--validate` | Validate the loaded fingerprint database (after any `--fingerprint-dir` merge) for structural integrity and exit without scanning. Exits `0` if valid, `2` (listing every problem) if not. No target required. | *(off)* |
 | `--format` | `json`, `text`, `csv`, or `sarif`. | `json` |
 | `--output-file`, `-o` | Write output to this path instead of stdout. | *(stdout)* |
 | `--timeout` | Per-request timeout (seconds). | `5.0` |
@@ -158,6 +159,48 @@ expected before running a sweep:
 ```bash
 hellhound --list-fingerprints --fingerprint-dir ~/fp --format text
 ```
+
+### Validating the fingerprint database
+
+The fingerprint database is hellhound's core asset, and a private set loaded
+with `--fingerprint-dir` is easy to get subtly wrong — a mistyped severity, an
+unsupported auth type, a duplicate id, a `match` block with no positive
+condition (so it can never fire), or an entry with no default credentials. None
+of these crash the scanner; they just silently degrade results (a bad severity
+quietly mismaps the SARIF level, a duplicate id breaks the merge and SARIF rule
+grouping, a dead fingerprint never matches). `--validate` checks the **effective
+set hellhound would actually scan with** — the bundled database merged with any
+`--fingerprint-dir` overrides — and exits without touching the network:
+
+```bash
+# sanity-check the bundled database
+hellhound --validate
+
+# gate a private set before a sweep (and in CI)
+hellhound --validate --fingerprint-dir ~/fp
+```
+
+It reports **every** problem it finds, not just the first, so you can fix a
+custom set in one pass:
+
+```
+error: fingerprint set 'default' failed validation (3 problem(s)):
+  - acme-cam: invalid severity 'criticl' (expected one of ['critical', 'high', 'low', 'medium'])
+  - acme-cam: invalid auth type 'telnet' (expected one of ['basic', 'form'])
+  - widget-nvr: match has no positive condition (set at least one of http_title / body_contains / header_contains) — it can never match a device
+```
+
+A valid set prints a one-line confirmation and exits `0`; an invalid one prints
+the problems to stderr and exits `2`, so it drops cleanly into a CI step that
+fails the build on a malformed fingerprint set:
+
+```bash
+hellhound --validate --fingerprint-dir ./fingerprints || exit 1
+```
+
+The checks are: unique ids, severity in `low`/`medium`/`high`/`critical`, auth
+type in `basic`/`form`, at least one positive `match` condition, and at least
+one default credential per entry.
 
 ### Output
 
