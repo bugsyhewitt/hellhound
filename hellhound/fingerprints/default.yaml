@@ -1447,3 +1447,186 @@ fingerprints:
       path: /prx/000/http/localhost/login
       username_field: username
       password_field: password
+
+  # --- Phase 2 expansion (ninth tranche): internet-facing enterprise appliances,
+  # NAS devices, file servers and web platforms mass-exploited across the
+  # 2024-2025 CISA KEV / ransomware landscape (FortiJump, Cl0p, ransomware
+  # affiliates, botnet recruitment of NAS boxes). Recognised from their web
+  # management / login surface, with the documented default web-admin credentials
+  # checked. None of these device classes were covered by tranches 1-8. Default
+  # credentials verified from vendor documentation and public advisories. ---
+
+  - id: fortinet-fortimanager
+    vendor: Fortinet
+    model_class: FortiManager central management
+    severity: critical
+    description: >-
+      FortiManager is an internet-facing central management appliance for Fortinet
+      fleets, mass-exploited in late 2024 via the "FortiJump" missing-auth FGFM
+      flaw (CVE-2024-47575, CISA KEV). Lab and trial deployments retain the
+      documented admin account with an empty password on the web console.
+    cve:
+      - CVE-2024-47575
+    match:
+      path: /
+      body_contains: "FortiManager"
+    default_credentials:
+      - {username: admin, password: ""}
+    auth:
+      type: form
+      path: /p/login/
+      username_field: username
+      password_field: secretkey
+
+  - id: sophos-firewall
+    vendor: Sophos
+    model_class: Sophos Firewall (XG / SFOS) admin
+    severity: critical
+    description: >-
+      Sophos Firewall (XG / SFOS) exposes an internet-facing web admin console
+      repeatedly mass-exploited (CVE-2022-1040 auth bypass and related KEV
+      entries). Appliances left at factory settings retain the documented
+      admin/admin web administrator account.
+    cve:
+      - CVE-2022-1040
+    match:
+      path: /
+      body_contains: "Sophos"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /webconsole/Controller
+      username_field: username
+      password_field: password
+
+  - id: dlink-dns-nas
+    vendor: D-Link
+    model_class: DNS-series network storage (NAS)
+    severity: critical
+    description: >-
+      D-Link DNS-320 / DNS-325 / DNS-340L network-storage devices expose an
+      internet-facing web management interface mass-exploited in 2024 via an
+      unauthenticated command-injection flaw (CVE-2024-3273, CISA KEV) and
+      recruited into botnets. Units left unhardened retain the documented
+      admin account with a blank password.
+    cve:
+      - CVE-2024-3273
+    match:
+      path: /
+      body_contains: "ShareCenter"
+    default_credentials:
+      - {username: admin, password: ""}
+    auth:
+      type: form
+      path: /cgi-bin/login_mgr.cgi
+      username_field: username
+      password_field: password
+
+  - id: kemp-loadmaster
+    vendor: Progress
+    model_class: Kemp LoadMaster load balancer
+    severity: critical
+    description: >-
+      Progress Kemp LoadMaster is an internet-facing load-balancer appliance
+      mass-exploited in 2024 via an unauthenticated command-injection flaw in its
+      management interface (CVE-2024-1212, CISA KEV). Default deployments ship
+      with the documented bal/1fourall web administrator account.
+    cve:
+      - CVE-2024-1212
+    match:
+      path: /
+      body_contains: "LoadMaster"
+    default_credentials:
+      - {username: bal, password: "1fourall"}
+    auth:
+      type: form
+      path: /progs/doconfig/login
+      username_field: usr
+      password_field: pass
+
+  - id: zimbra-collaboration
+    vendor: Synacor
+    model_class: Zimbra Collaboration webmail
+    severity: high
+    description: >-
+      Zimbra Collaboration is an internet-facing webmail and groupware platform
+      mass-exploited in 2024 via an SMTP/postjournal RCE (CVE-2024-45519, CISA
+      KEV). Trial and lab deployments retain the documented admin/zimbra
+      administrator account on the web client.
+    cve:
+      - CVE-2024-45519
+    match:
+      path: /
+      body_contains: "Zimbra"
+    default_credentials:
+      - {username: admin, password: zimbra}
+    auth:
+      type: form
+      path: /service/soap
+      username_field: username
+      password_field: password
+
+  - id: rejetto-hfs
+    vendor: Rejetto
+    model_class: Rejetto HTTP File Server
+    severity: high
+    description: >-
+      Rejetto HTTP File Server (HFS) is a lightweight internet-facing file server
+      mass-exploited in 2024 via a template-injection RCE (CVE-2024-23692, CISA
+      KEV) and used to drop cryptominers and botnets. Shared instances are often
+      left with the documented admin/admin web account.
+    cve:
+      - CVE-2024-23692
+    match:
+      path: /
+      body_contains: "HttpFileServer"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: basic
+      path: /~login
+
+  - id: gitlab-ce
+    vendor: GitLab
+    model_class: GitLab Community Edition
+    severity: high
+    description: >-
+      GitLab Community Edition is an internet-facing source-code platform whose
+      account-takeover password-reset flaw was mass-exploited in 2024
+      (CVE-2023-7028, CISA KEV). Fresh self-managed installs ship with the
+      documented root administrator account using the default seeded password.
+    cve:
+      - CVE-2023-7028
+    match:
+      path: /
+      body_contains: "GitLab"
+    default_credentials:
+      - {username: root, password: "5iveL!fe"}
+    auth:
+      type: form
+      path: /users/sign_in
+      username_field: "user[login]"
+      password_field: "user[password]"
+
+  - id: nextgen-mirth-connect
+    vendor: NextGen Healthcare
+    model_class: Mirth Connect integration engine
+    severity: critical
+    description: >-
+      NextGen Mirth Connect is an internet-facing healthcare data-integration
+      engine mass-exploited in 2023-2024 via an unauthenticated deserialization
+      RCE (CVE-2023-43208, CISA KEV). Default deployments ship with the
+      documented admin/admin administrator account on the web console.
+    cve:
+      - CVE-2023-43208
+    match:
+      path: /
+      body_contains: "Mirth Connect"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /api/users/_login
+      username_field: username
+      password_field: password
