@@ -324,6 +324,34 @@ within the v0.1 contract and the out-of-scope guardrails.
 
 ---
 
+### 13. Fingerprint tranche 12 — 8 KEV edge/VPN/remote-support classes (96 → 104) — ✅ IMPLEMENTED (Phase 2, Rotation 25)
+
+**Status:** Done. Item 1 (fingerprint-database expansion) remains the standing
+top priority, so this rotation extended it with an eighth tranche-style batch of
+8 CISA-KEV device classes, taking the bundled `default.yaml` from 96 to 104
+entries: Ivanti Cloud Services Appliance (CVE-2024-8190 / CVE-2024-8963), Versa
+Director (CVE-2024-39717, "VersaMem"), Trimble Cityworks (CVE-2025-0994),
+SimpleHelp remote-support server (CVE-2024-57727), Mitel MiCollab
+(CVE-2024-41713), BeyondTrust Privileged Remote Access (CVE-2024-12356), Cisco
+ASA / FTD WebVPN (CVE-2024-20353 / CVE-2024-20359, "ArcaneDoor"), and Juniper
+Junos J-Web (CVE-2023-36844). Each entry carries its `cve` list and a
+form-auth check. 9 mock-transport unit tests in
+`tests/test_fingerprints_phase2_tranche12.py` (one per entry proving fingerprint
+match + default-credential authentication, plus a matched-but-rotated guard
+using the Ivanti CSA entry) prove detection with no network and no Docker. No
+engine changes. README "Fingerprint format" coverage paragraph, the count, and
+the `--list-fingerprints` example output updated to 104.
+
+**Considered but not chosen this rotation:** a `--profile` /
+`custom-fingerprint-set` alias flag. On inspection the requested capability is
+already served by the shipped `--fingerprint-set` (selects a named bundled set)
+and `--fingerprint-dir` (merges a user `<set>.yaml` over the bundled base), so a
+`--profile` flag would be a redundant alias rather than new value. The
+fingerprint-database expansion (roadmap item 1, the standing top priority)
+delivered real new coverage instead.
+
+---
+
 ## Out-of-scope (not in any Phase 2 lap)
 
 These directions are explicitly out of scope for hellhound and must not be
