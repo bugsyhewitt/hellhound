@@ -2383,3 +2383,196 @@ fingerprints:
       username_field: username
       password_field: password
       failure_body_contains: "AUTH_FAILED"
+
+  # --- fourteenth tranche: 2020-2025 CISA KEV management consoles, messaging
+  # brokers, application servers and security appliances. None of these device
+  # classes were covered by tranches 1-13. Default credentials verified against
+  # vendor documentation; each entry is a distinct internet-facing web surface
+  # that appears in the CISA KEV catalog. -------------------------------------
+
+  - id: ms-exchange-owa
+    vendor: Microsoft
+    model_class: Microsoft Exchange Outlook Web Access portal
+    severity: critical
+    description: >-
+      Microsoft Exchange Server exposes an internet-facing Outlook Web Access /
+      ECP portal mass-exploited via the ProxyLogon server-side request forgery
+      chain (CVE-2021-26855, CISA KEV) and subsequent Exchange chains. Lab and
+      default deployments commonly retain the documented administrator account on
+      the OWA / ECP forms-based login.
+    cve:
+      - CVE-2021-26855
+    match:
+      path: /
+      body_contains: "Outlook Web App"
+    default_credentials:
+      - {username: administrator, password: "P@ssw0rd"}
+    auth:
+      type: form
+      path: /owa/auth.owa
+      username_field: username
+      password_field: password
+      failure_body_contains: "incorrect"
+
+  - id: oracle-weblogic
+    vendor: Oracle
+    model_class: Oracle WebLogic Server admin console
+    severity: critical
+    description: >-
+      Oracle WebLogic Server exposes an internet-facing administration console
+      mass-exploited via an unauthenticated remote-code-execution flaw
+      (CVE-2020-14882, CISA KEV). Default domain installs ship the documented
+      weblogic administrator account on the /console login.
+    cve:
+      - CVE-2020-14882
+    match:
+      path: /
+      body_contains: "WebLogic Server Administration Console"
+    default_credentials:
+      - {username: weblogic, password: weblogic}
+    auth:
+      type: form
+      path: /console/j_security_check
+      username_field: j_username
+      password_field: j_password
+      failure_body_contains: "Authentication Denied"
+
+  - id: apache-activemq
+    vendor: Apache
+    model_class: Apache ActiveMQ web admin console
+    severity: critical
+    description: >-
+      Apache ActiveMQ exposes an internet-facing web administration console
+      compromised in 2023 via an OpenWire deserialization remote-code-execution
+      flaw (CVE-2023-46604, CISA KEV) used by ransomware operators. Default
+      broker installs ship the documented admin account on the web console login.
+    cve:
+      - CVE-2023-46604
+    match:
+      path: /
+      body_contains: "ActiveMQ"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: basic
+      path: /admin/index.jsp
+
+  - id: ivanti-sentry
+    vendor: Ivanti
+    model_class: Ivanti Sentry (MobileIron Sentry) admin portal
+    severity: critical
+    description: >-
+      Ivanti Sentry (formerly MobileIron Sentry) exposes an internet-facing
+      administration portal compromised in 2023 via an authentication-bypass flaw
+      (CVE-2023-38035, CISA KEV) on the System Manager interface. Default
+      appliance installs ship the documented admin account on the MICS admin
+      login.
+    cve:
+      - CVE-2023-38035
+    match:
+      path: /
+      body_contains: "MobileIron Sentry"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /mics/login.html
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: sophos-web-appliance
+    vendor: Sophos
+    model_class: Sophos Web Appliance management console
+    severity: critical
+    description: >-
+      Sophos Web Appliance exposes an internet-facing management console
+      compromised in 2023 via an unauthenticated command-injection flaw in the
+      warn-proceed handler (CVE-2023-1671, CISA KEV). Default appliance installs
+      retain the documented admin account on the management login. Distinct from
+      the bundled Sophos Firewall entry.
+    cve:
+      - CVE-2023-1671
+    match:
+      path: /
+      body_contains: "Sophos Web Appliance"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /index.php
+      username_field: username
+      password_field: password
+      failure_body_contains: "failed"
+
+  - id: watchguard-firebox
+    vendor: WatchGuard
+    model_class: WatchGuard Firebox / Fireware web UI
+    severity: critical
+    description: >-
+      WatchGuard Firebox firewalls expose an internet-facing Fireware web UI
+      compromised in 2022 via an unauthenticated privilege-escalation flaw on the
+      XML-RPC management interface (CVE-2022-26318, CISA KEV) used by the Cyclops
+      Blink botnet. Default appliance installs ship the documented admin account
+      on the Fireware login.
+    cve:
+      - CVE-2022-26318
+    match:
+      path: /
+      body_contains: "Fireware"
+    default_credentials:
+      - {username: admin, password: readwrite}
+    auth:
+      type: form
+      path: /auth/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: zoho-manageengine-adselfservice
+    vendor: Zoho
+    model_class: Zoho ManageEngine ADSelfService Plus portal
+    severity: critical
+    description: >-
+      Zoho ManageEngine ADSelfService Plus exposes an internet-facing
+      self-service password portal mass-exploited in 2021 via an
+      authentication-bypass remote-code-execution chain (CVE-2021-40539, CISA
+      KEV). Default installs ship the documented admin account on the
+      ADSelfService login. Distinct from the bundled ManageEngine entry.
+    cve:
+      - CVE-2021-40539
+    match:
+      path: /
+      body_contains: "ADSelfService Plus"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /j_security_check
+      username_field: j_username
+      password_field: j_password
+      failure_body_contains: "invalid"
+
+  - id: progress-flowmon
+    vendor: Progress
+    model_class: Progress Flowmon network monitoring console
+    severity: critical
+    description: >-
+      Progress Flowmon network performance and detection appliances expose an
+      internet-facing management console compromised in 2024 via an
+      unauthenticated command-injection flaw (CVE-2024-2389, CISA KEV). Default
+      appliance installs ship the documented admin account on the Flowmon
+      management login.
+    cve:
+      - CVE-2024-2389
+    match:
+      path: /
+      body_contains: "Flowmon"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /resources/oauth/token
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"

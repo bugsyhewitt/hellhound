@@ -132,7 +132,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 112 fingerprint(s) loaded
+hellhound: 120 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -496,7 +496,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 112 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 120 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -575,7 +575,15 @@ Fortinet FortiOS SSL-VPN (CVE-2024-21762), Progress Kemp LoadMaster
 (CVE-2024-1212), Check Point Security Gateway (CVE-2024-24919), Palo Alto PAN-OS
 management (CVE-2024-9474), Ivanti Virtual Traffic Manager (CVE-2024-7593),
 NAKIVO Backup & Replication (CVE-2024-48248), SonicWall SMA 100 series
-(CVE-2025-23006), and the Zimbra Collaboration admin console (CVE-2024-45519).
+(CVE-2025-23006), and the Zimbra Collaboration admin console (CVE-2024-45519). A
+fourteenth tranche covers internet-facing management consoles, messaging brokers,
+application servers and security appliances mass-exploited across the 2020-2025
+CISA KEV catalog: Microsoft Exchange Outlook Web Access (CVE-2021-26855,
+ProxyLogon), Oracle WebLogic Server admin console (CVE-2020-14882), Apache
+ActiveMQ web console (CVE-2023-46604), Ivanti Sentry / MobileIron Sentry
+(CVE-2023-38035), Sophos Web Appliance (CVE-2023-1671), WatchGuard Firebox /
+Fireware (CVE-2022-26318, Cyclops Blink), Zoho ManageEngine ADSelfService Plus
+(CVE-2021-40539), and the Progress Flowmon monitoring console (CVE-2024-2389).
 
 Each file has a top-level `fingerprints` list. An entry:
 
