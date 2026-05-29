@@ -542,3 +542,169 @@ fingerprints:
       path: /login.cgi
       username_field: username
       password_field: password
+
+  # --- Phase 2 expansion (fourth tranche): network-edge and industrial device
+  # classes from 2024-2025 mass-exploitation campaigns and Mirai variant target
+  # lists (Akamai / GreyNoise / CISA advisories). Default credentials verified
+  # from vendor documentation and public advisories. ---
+
+  - id: zyxel-firewall
+    vendor: Zyxel
+    model_class: VPN firewall / security gateway (ZLD)
+    severity: critical
+    description: >-
+      Zyxel USG / ATP / VPN ZLD firewalls default to admin/1234 on the web
+      console and are recurrently mass-exploited (CVE-2023-28771 and follow-on
+      campaigns). Supplements the SOHO zyxel-router entry.
+    cve:
+      - CVE-2023-28771
+    match:
+      path: /
+      body_contains: "/ext-js/login.html"
+    default_credentials:
+      - {username: admin, password: "1234"}
+    auth:
+      type: form
+      path: /cgi-bin/login.cgi
+      username_field: username
+      password_field: password
+
+  - id: draytek-vigor
+    vendor: DrayTek
+    model_class: SOHO / SMB router (Vigor)
+    severity: high
+    description: >-
+      DrayTek Vigor routers default to admin/admin on the web UI and were a
+      headline 2024 mass-exploitation target (CVE-2024-41592 / pre-auth RCE
+      chain).
+    cve:
+      - CVE-2024-41592
+    match:
+      path: /
+      http_title: Vigor
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /cgi-bin/wlogin.cgi
+      username_field: aa
+      password_field: ab
+
+  - id: ruckus-ap
+    vendor: Ruckus
+    model_class: Wireless AP / controller (Unleashed / ZoneDirector)
+    severity: high
+    description: >-
+      Ruckus (CommScope) Unleashed and ZoneDirector wireless controllers ship
+      with super/sp-admin and were exploited at scale by the AndoryuBot / Mirai
+      variants via CVE-2023-25717.
+    cve:
+      - CVE-2023-25717
+    match:
+      path: /
+      body_contains: "Ruckus"
+    default_credentials:
+      - {username: super, password: sp-admin}
+    auth:
+      type: form
+      path: /admin/login.jsp
+      username_field: username
+      password_field: password
+
+  - id: edimax-camera
+    vendor: Edimax
+    model_class: Network camera (IC series)
+    severity: high
+    description: >-
+      Edimax IC-series IP cameras ship with admin/1234 and were swept into a
+      Mirai-based botnet in 2025 via an unpatched command-injection flaw
+      (CVE-2025-1316).
+    cve:
+      - CVE-2025-1316
+    match:
+      path: /
+      body_contains: "edimax"
+    default_credentials:
+      - {username: admin, password: "1234"}
+    auth:
+      type: basic
+      path: /camera-cgi/admin/param.cgi?action=list
+
+  - id: four-faith-router
+    vendor: Four-Faith
+    model_class: Industrial cellular router
+    severity: critical
+    description: >-
+      Four-Faith industrial routers (F3x24 family) ship with apadmin/admin and
+      were actively exploited by a Mirai botnet via an OS command-injection flaw
+      (CVE-2024-12856).
+    cve:
+      - CVE-2024-12856
+    match:
+      path: /
+      body_contains: "Four-Faith"
+    default_credentials:
+      - {username: apadmin, password: admin}
+    auth:
+      type: form
+      path: /apply.cgi
+      username_field: username
+      password_field: password
+
+  - id: contec-solarview
+    vendor: Contec
+    model_class: Solar power monitoring gateway (SolarView)
+    severity: high
+    description: >-
+      Contec SolarView solar-power monitoring appliances default to
+      admin/admin and were mass-exploited by Mirai variants targeting
+      photovoltaic infrastructure (CVE-2023-29552 / CVE-2022-29303).
+    cve:
+      - CVE-2022-29303
+    match:
+      path: /
+      body_contains: "SolarView"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login.php
+      username_field: user
+      password_field: pass
+
+  - id: avtech-avn-camera
+    vendor: AVTECH
+    model_class: IP Camera (AVM/AVN)
+    severity: high
+    description: >-
+      AVTECH AVM1203 / AVN-series IP cameras ship with admin/admin on the
+      streaming web interface and were enrolled into the Corona Mirai botnet in
+      2024 (CVE-2024-7029). Supplements the avtech-dvr entry.
+    cve:
+      - CVE-2024-7029
+    match:
+      path: /
+      body_contains: "/cgi-bin/supervisor/"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: basic
+      path: /cgi-bin/supervisor/Login.cgi
+
+  - id: optilink-ont
+    vendor: OptiLink
+    model_class: GPON ONT / fiber router
+    severity: high
+    description: >-
+      OptiLink (and OEM-rebranded GPON home gateways) ship with admin/admin on
+      the web UI and remain a staple Mirai target across fiber ISP deployments.
+    match:
+      path: /
+      http_title: "GPON Home Gateway"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /boaform/admin/formLogin
+      username_field: username
+      password_field: psd
