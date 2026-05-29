@@ -131,7 +131,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 48 fingerprint(s) loaded
+hellhound: 56 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -435,7 +435,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 48 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 56 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -459,7 +459,14 @@ Security Gateway (CVE-2023-2868), Cisco IOS XE web UI
 (CVE-2023-20198 / CVE-2023-20273), Progress MOVEit Transfer (CVE-2023-34362),
 Progress Telerik (CVE-2024-4358), Atlassian Confluence (CVE-2023-22515), Ivanti
 Connect Secure (CVE-2023-46805 / CVE-2024-21887), Fortinet FortiGate
-(CVE-2024-21762), and SonicWall Secure Mobile Access (CVE-2024-38475).
+(CVE-2024-21762), and SonicWall Secure Mobile Access (CVE-2024-38475). A sixth
+tranche covers internet-facing enterprise servers and remote-access appliances
+from the 2023-2025 CISA KEV / mass-exploitation lists: Veeam Backup &
+Replication (CVE-2024-40711), Citrix NetScaler ADC/Gateway
+(CVE-2023-4966 / CVE-2025-5777, CitrixBleed), Progress WS_FTP Server
+(CVE-2023-40044), Adobe ColdFusion (CVE-2023-26360), ConnectWise ScreenConnect
+(CVE-2024-1709), GeoServer (CVE-2024-36401), Roundcube webmail (CVE-2024-37383),
+and PaperCut NG/MF print management (CVE-2023-27350).
 
 Each file has a top-level `fingerprints` list. An entry:
 
