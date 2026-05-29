@@ -132,7 +132,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 136 fingerprint(s) loaded
+hellhound: 144 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -496,7 +496,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 136 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 144 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -599,7 +599,16 @@ mass-exploited across the 2024-2025 CISA KEV catalog: Fortinet FortiVoice
 Experience Platform (CVE-2025-34509 / CVE-2025-27218), the Wazuh security
 platform (CVE-2025-24016), Craft CMS (CVE-2025-23209), Gladinet CentreStack /
 Triofox (CVE-2025-30406), Ivanti Endpoint Manager (CVE-2024-29824), and Mitel
-6800 / 6900-series SIP desk phones (CVE-2024-41710).
+6800 / 6900-series SIP desk phones (CVE-2024-41710). A seventeenth tranche
+covers additional internet-facing identity, endpoint-protection, ITSM,
+file-sharing, NAS, SOHO router, IP-camera and SaaS-platform consoles
+mass-exploited across the CISA KEV catalog: Cisco Smart Software Manager
+On-Prem (CVE-2024-20419), PTZOptics PT30X-series PTZ cameras (CVE-2024-8956 /
+CVE-2024-8957), Trend Micro Apex One (CVE-2024-49419), Synology DiskStation
+Manager (CVE-2024-10443), ServiceNow Now Platform (CVE-2024-4879), TP-Link
+Archer C5400X gaming routers (CVE-2024-5035), the WSO2 Carbon management
+console (CVE-2022-29464), and Ruijie Reyee cloud-managed access points /
+gateways (CVE-2024-47547).
 
 Each file has a top-level `fingerprints` list. An entry:
 
