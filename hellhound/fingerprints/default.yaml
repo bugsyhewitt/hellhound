@@ -2194,3 +2194,192 @@ fingerprints:
       username_field: username
       password_field: password
       failure_body_contains: "incorrect"
+
+  # --- thirteenth tranche: 2023-2025 CISA KEV edge / MFT / VPN / ITSM classes ---
+
+  - id: fortinet-fortios-ssl-vpn
+    vendor: Fortinet
+    model_class: Fortinet FortiOS SSL-VPN web portal
+    severity: critical
+    description: >-
+      Fortinet FortiGate firewalls expose an internet-facing FortiOS SSL-VPN web
+      portal mass-exploited via the FortiOS out-of-bounds write CVE-2024-21762
+      (CISA KEV) and earlier SSL-VPN chains. Lab and default deployments commonly
+      retain the documented admin account on the SSL-VPN management login.
+    cve:
+      - CVE-2024-21762
+    match:
+      path: /
+      body_contains: "sslvpn"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /remote/logincheck
+      username_field: username
+      password_field: credential
+      failure_body_contains: "denied"
+
+  - id: progress-loadmaster
+    vendor: Progress
+    model_class: Progress Kemp LoadMaster management UI
+    severity: critical
+    description: >-
+      Progress Kemp LoadMaster application delivery controllers expose an
+      internet-facing management UI compromised in 2024 via an unauthenticated
+      command-injection flaw (CVE-2024-1212, CISA KEV). Default appliance installs
+      ship the documented bal administrator account on the management login.
+    cve:
+      - CVE-2024-1212
+    match:
+      path: /
+      body_contains: "LoadMaster"
+    default_credentials:
+      - {username: bal, password: "1fourall"}
+    auth:
+      type: form
+      path: /progs/doconfig/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: checkpoint-gateway
+    vendor: Check Point
+    model_class: Check Point Security Gateway remote-access portal
+    severity: critical
+    description: >-
+      Check Point Quantum / Spark security gateways expose an internet-facing
+      remote-access VPN portal targeted in 2024 via an information-disclosure flaw
+      (CVE-2024-24919, CISA KEV). Lab and default deployments commonly retain the
+      documented admin account on the gateway management login.
+    cve:
+      - CVE-2024-24919
+    match:
+      path: /
+      body_contains: "Check Point"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /sslvpn/Login/Login
+      username_field: userName
+      password_field: password
+      failure_body_contains: "failed"
+
+  - id: paloalto-panos-mgmt
+    vendor: Palo Alto Networks
+    model_class: Palo Alto PAN-OS management web interface
+    severity: critical
+    description: >-
+      Palo Alto Networks PAN-OS firewalls expose an internet-facing management
+      web interface mass-exploited in 2024 via a command-injection chain
+      (CVE-2024-9474, CISA KEV). Lab and default deployments commonly retain the
+      documented admin account on the PAN-OS management login.
+    cve:
+      - CVE-2024-9474
+    match:
+      path: /
+      body_contains: "PAN-OS"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /php/login.php
+      username_field: user
+      password_field: passwd
+      failure_body_contains: "invalid"
+
+  - id: ivanti-vtm
+    vendor: Ivanti
+    model_class: Ivanti Virtual Traffic Manager admin console
+    severity: critical
+    description: >-
+      Ivanti Virtual Traffic Manager (vTM) exposes an internet-facing admin
+      console with an authentication-bypass flaw exploited in 2024
+      (CVE-2024-7593, CISA KEV) that lets an attacker create rogue administrator
+      accounts. Default deployments ship the documented admin account on the vTM
+      management login.
+    cve:
+      - CVE-2024-7593
+    match:
+      path: /
+      body_contains: "Virtual Traffic Manager"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /apps/zxtm/login.cgi
+      username_field: username
+      password_field: password
+      failure_body_contains: "incorrect"
+
+  - id: nakivo-backup
+    vendor: NAKIVO
+    model_class: NAKIVO Backup & Replication director
+    severity: high
+    description: >-
+      NAKIVO Backup & Replication exposes an internet-facing director web console
+      compromised in 2024 via an absolute-path-traversal flaw (CVE-2024-48248,
+      CISA KEV). Default deployments ship the documented admin account on the
+      director login.
+    cve:
+      - CVE-2024-48248
+    match:
+      path: /
+      body_contains: "NAKIVO"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /c/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "failed"
+
+  - id: sma100-appliance
+    vendor: SonicWall
+    model_class: SonicWall SMA 100 series appliance portal
+    severity: critical
+    description: >-
+      SonicWall Secure Mobile Access (SMA) 100 series appliances expose an
+      internet-facing management and remote-access portal mass-exploited in 2025
+      via a deserialization flaw (CVE-2025-23006, CISA KEV). Lab and default
+      deployments commonly retain the documented admin account on the appliance
+      management login.
+    cve:
+      - CVE-2025-23006
+    match:
+      path: /
+      body_contains: "SMA"
+    default_credentials:
+      - {username: admin, password: password}
+    auth:
+      type: form
+      path: /__api__/v1/logon
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: zimbra-collaboration-soap
+    vendor: Synacor
+    model_class: Zimbra Collaboration admin console
+    severity: critical
+    description: >-
+      Zimbra Collaboration suite exposes an internet-facing admin console
+      mass-exploited in 2024-2025 via an SMTP/postjournal RCE chain
+      (CVE-2024-45519, CISA KEV). Default deployments retain the documented admin
+      account on the Zimbra admin login. Complements the bundled webmail entry by
+      targeting the separate /zimbraAdmin console.
+    cve:
+      - CVE-2024-45519
+    match:
+      path: /
+      body_contains: "Zimbra Administration"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /service/admin/soap
+      username_field: username
+      password_field: password
+      failure_body_contains: "AUTH_FAILED"
