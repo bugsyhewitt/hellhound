@@ -131,7 +131,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 64 fingerprint(s) loaded
+hellhound: 72 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -435,7 +435,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 64 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 72 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -472,7 +472,13 @@ internet-facing enterprise web applications and management consoles from the
 (CVE-2022-47966), Citrix ShareFile (CVE-2023-24489), Apache OFBiz
 (CVE-2023-49070 / CVE-2024-45195), Openfire XMPP (CVE-2023-32315), SolarWinds
 Orion / Web Help Desk (CVE-2024-28987), Langflow (CVE-2025-3248), Apache Tomcat
-Manager (CVE-2025-24813), and Cacti (CVE-2022-46169).
+Manager (CVE-2025-24813), and Cacti (CVE-2022-46169). An eighth tranche covers
+enterprise edge appliances and internet-facing applications mass-exploited
+across the 2024-2025 CISA KEV / ransomware landscape: Progress WhatsUp Gold
+(CVE-2024-6670 / CVE-2024-4885), Apache Struts 2 (CVE-2024-53677), Palo Alto
+PAN-OS GlobalProtect (CVE-2024-3400), Ivanti Avalanche (CVE-2023-32560), VMware
+vCenter Server (CVE-2024-38812), CrushFTP (CVE-2024-4040), CyberPanel
+(CVE-2024-51378), and Array Networks AG/vxAG SSL VPN (CVE-2023-28461).
 
 Each file has a top-level `fingerprints` list. An entry:
 

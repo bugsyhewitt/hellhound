@@ -1264,3 +1264,186 @@ fingerprints:
       path: /index.php
       username_field: login_username
       password_field: login_password
+
+  # --- Phase 2 expansion (eighth tranche): enterprise edge appliances and
+  # internet-facing applications mass-exploited in 2024-2025 (CISA KEV, GreyNoise,
+  # ransomware campaigns). Recognised from their web management surface, with the
+  # documented factory default web-admin credentials checked. ---
+
+  - id: whatsup-gold
+    vendor: Progress
+    model_class: WhatsUp Gold network monitor
+    severity: critical
+    description: >-
+      Progress WhatsUp Gold is an internet-facing network-monitoring web
+      application whose login surface was mass-exploited in 2024 via
+      unauthenticated SQL-injection / RCE flaws (CVE-2024-6670 and
+      CVE-2024-4885, both added to CISA KEV). Default installs ship with the
+      documented admin/admin administrator account on the web console.
+    cve:
+      - CVE-2024-6670
+      - CVE-2024-4885
+    match:
+      path: /
+      body_contains: "WhatsUp Gold"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /NmConsole/api/core/authenticate
+      username_field: username
+      password_field: password
+
+  - id: apache-struts2
+    vendor: Apache
+    model_class: Struts 2 web application
+    severity: critical
+    description: >-
+      Apache Struts 2 is a widely deployed internet-facing Java web framework
+      that was mass-exploited in 2024 via a path-traversal file-upload RCE
+      (CVE-2024-53677, added to CISA KEV). Sample / showcase applications that
+      ship with Struts retain the documented admin/admin console account.
+    cve:
+      - CVE-2024-53677
+    match:
+      path: /
+      body_contains: "Struts2"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login.action
+      username_field: username
+      password_field: password
+
+  - id: paloalto-globalprotect
+    vendor: Palo Alto Networks
+    model_class: PAN-OS GlobalProtect / web management
+    severity: critical
+    description: >-
+      Palo Alto Networks PAN-OS firewalls expose a GlobalProtect portal and a
+      web management UI that were mass-exploited in 2024 via an unauthenticated
+      command-injection RCE (CVE-2024-3400, added to CISA KEV). Appliances that
+      were never hardened retain the documented admin/admin web account.
+    cve:
+      - CVE-2024-3400
+    match:
+      path: /
+      body_contains: "GlobalProtect"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /php/login.php
+      username_field: user
+      password_field: passwd
+
+  - id: ivanti-avalanche
+    vendor: Ivanti
+    model_class: Avalanche mobile device management
+    severity: high
+    description: >-
+      Ivanti Avalanche is an internet-facing enterprise mobile-device-management
+      console repeatedly mass-exploited (CVE-2023-32560 and related KEV entries).
+      Fresh installs ship with the documented amcadmin/admin administrator
+      account on the web management console.
+    cve:
+      - CVE-2023-32560
+    match:
+      path: /
+      body_contains: "Avalanche"
+    default_credentials:
+      - {username: amcadmin, password: admin}
+    auth:
+      type: form
+      path: /AvalancheWeb/login
+      username_field: username
+      password_field: password
+
+  - id: vmware-vcenter
+    vendor: VMware
+    model_class: vCenter Server appliance
+    severity: critical
+    description: >-
+      VMware vCenter Server is an internet-exposed virtualization-management
+      appliance that was mass-exploited in 2024 via a heap-overflow RCE in its
+      DCE/RPC implementation (CVE-2024-38812). Lab and trial deployments retain
+      the documented administrator@vsphere.local default account.
+    cve:
+      - CVE-2024-38812
+    match:
+      path: /
+      body_contains: "vSphere Client"
+    default_credentials:
+      - {username: "administrator@vsphere.local", password: "VMware1!"}
+    auth:
+      type: form
+      path: /ui/login
+      username_field: username
+      password_field: password
+
+  - id: crushftp
+    vendor: CrushFTP
+    model_class: CrushFTP file-transfer server
+    severity: critical
+    description: >-
+      CrushFTP is an internet-facing managed-file-transfer server whose web
+      interface was mass-exploited in 2024 via an unauthenticated VFS sandbox
+      escape (CVE-2024-4040, added to CISA KEV). Default installs ship with the
+      documented crushadmin/crushadmin administrator account.
+    cve:
+      - CVE-2024-4040
+    match:
+      path: /
+      body_contains: "CrushFTP"
+    default_credentials:
+      - {username: crushadmin, password: crushadmin}
+    auth:
+      type: form
+      path: /WebInterface/function/
+      username_field: user
+      password_field: pass
+
+  - id: cyberpanel
+    vendor: CyberPanel
+    model_class: CyberPanel hosting control panel
+    severity: critical
+    description: >-
+      CyberPanel is an internet-facing web hosting control panel that was
+      mass-exploited in late 2024 by ransomware operators via an
+      authentication-bypass command-injection chain (CVE-2024-51378). Default
+      installs ship with the documented admin/1234567 administrator account.
+    cve:
+      - CVE-2024-51378
+    match:
+      path: /
+      body_contains: "CyberPanel"
+    default_credentials:
+      - {username: admin, password: "1234567"}
+    auth:
+      type: form
+      path: /login/authLogin
+      username_field: username
+      password_field: password
+
+  - id: array-networks-ag
+    vendor: Array Networks
+    model_class: AG / vxAG SSL VPN gateway
+    severity: critical
+    description: >-
+      Array Networks AG and vxAG SSL VPN gateways expose an internet-facing web
+      portal that was mass-exploited in 2024 via a remote code execution flaw in
+      the SSL VPN component (CVE-2023-28461, added to CISA KEV in late 2024).
+      Appliances left unhardened retain the documented array/admin web account.
+    cve:
+      - CVE-2023-28461
+    match:
+      path: /
+      body_contains: "Array Networks"
+    default_credentials:
+      - {username: array, password: admin}
+    auth:
+      type: form
+      path: /prx/000/http/localhost/login
+      username_field: username
+      password_field: password
