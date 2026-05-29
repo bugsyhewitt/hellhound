@@ -3179,3 +3179,203 @@ fingerprints:
       username_field: username
       password_field: password
       failure_body_contains: "fail"
+
+  - id: jetbrains-teamcity
+    vendor: JetBrains
+    model_class: JetBrains TeamCity CI/CD server
+    severity: critical
+    description: >-
+      JetBrains TeamCity is a widely deployed self-hosted CI/CD server that
+      exposes an internet-facing web administration portal mass-exploited via
+      an authentication-bypass flaw in the REST API (CVE-2024-27198, CISA KEV),
+      used to silently mint admin tokens and pivot into source-control build
+      pipelines. Default installs retain the documented admin account on the
+      TeamCity login form.
+    cve:
+      - CVE-2024-27198
+    match:
+      path: /
+      body_contains: "TeamCity"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login.html
+      username_field: username
+      password_field: password
+      failure_body_contains: "incorrect"
+
+  - id: fortra-goanywhere-mft
+    vendor: Fortra
+    model_class: Fortra GoAnywhere Managed File Transfer (MFT)
+    severity: critical
+    description: >-
+      Fortra GoAnywhere MFT is an enterprise managed-file-transfer appliance
+      whose internet-facing admin console was mass-exploited via an
+      authentication-bypass in the account-initialisation path
+      (CVE-2024-0204, CISA KEV) allowing unauthenticated creation of a new
+      admin user. Default appliance installs retain the documented out-of-the-
+      box admin account on the GoAnywhere admin login.
+    cve:
+      - CVE-2024-0204
+    match:
+      path: /
+      body_contains: "GoAnywhere"
+    default_credentials:
+      - {username: administrator, password: goanywhere}
+    auth:
+      type: form
+      path: /goanywhere/auth/Login.xhtml
+      username_field: j_username
+      password_field: j_password
+      failure_body_contains: "invalid"
+
+  - id: splunk-enterprise
+    vendor: Splunk
+    model_class: Splunk Enterprise server
+    severity: critical
+    description: >-
+      Splunk Enterprise is a widely deployed SIEM / log-analytics platform
+      whose internet-facing web UI was mass-exploited via a path-traversal flaw
+      in the static-file handler (CVE-2024-36991, CISA KEV) leaking arbitrary
+      files. Default Splunk Enterprise installs prompt for first-login
+      credentials but many internet-exposed instances retain the documented
+      admin / changeme pair on the standard Splunk Web login.
+    cve:
+      - CVE-2024-36991
+    match:
+      path: /
+      body_contains: "splunk"
+    default_credentials:
+      - {username: admin, password: changeme}
+    auth:
+      type: form
+      path: /en-US/account/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: apache-superset
+    vendor: Apache
+    model_class: Apache Superset data-exploration platform
+    severity: high
+    description: >-
+      Apache Superset is a self-hosted BI / data-exploration web platform whose
+      internet-facing installs were mass-exploited via the well-known default
+      Flask SECRET_KEY allowing forged session cookies to log in as the
+      built-in admin account (CVE-2023-27524, CISA KEV). Default deployments
+      retain the documented admin account on the Superset login form.
+    cve:
+      - CVE-2023-27524
+    match:
+      path: /
+      body_contains: "Superset"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login/
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: atlassian-bitbucket
+    vendor: Atlassian
+    model_class: Atlassian Bitbucket Server / Data Center
+    severity: critical
+    description: >-
+      Atlassian Bitbucket Server / Data Center is a self-hosted Git repository
+      and code-collaboration platform whose internet-facing admin console was
+      mass-exploited via a command-injection flaw in the repository archive
+      endpoint (CVE-2022-43781, CISA KEV) reachable by any authenticated user.
+      Default Bitbucket installs retain the documented admin account on the
+      standard login form.
+    cve:
+      - CVE-2022-43781
+    match:
+      path: /
+      body_contains: "Bitbucket"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /j_atl_security_check
+      username_field: j_username
+      password_field: j_password
+      failure_body_contains: "incorrect"
+
+  - id: lexmark-printer
+    vendor: Lexmark
+    model_class: Lexmark network printer / MFP embedded web server
+    severity: high
+    description: >-
+      Lexmark network printers and multi-function devices expose an embedded
+      web server ("Embedded Web Server") for device administration. A widely
+      deployed family of models was mass-exploited via a server-side request
+      forgery / authenticated RCE chain in the embedded web server
+      (CVE-2023-26068, CISA KEV). Default Lexmark printers retain the
+      documented blank-password admin account on the device's embedded web
+      login.
+    cve:
+      - CVE-2023-26068
+    match:
+      path: /
+      body_contains: "Lexmark"
+    default_credentials:
+      - {username: admin, password: ""}
+    auth:
+      type: form
+      path: /cgi-bin/dynamic/webapps/login/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: glpi-server
+    vendor: GLPI Project
+    model_class: GLPI IT asset / service-management portal
+    severity: high
+    description: >-
+      GLPI is a widely deployed open-source IT asset and service-management
+      platform whose internet-facing portal was mass-exploited via a SQL
+      injection in the inventory-handling endpoint (CVE-2022-35914, CISA KEV)
+      leading to unauthenticated remote code execution. Default GLPI installs
+      retain the documented glpi/glpi super-admin account on the standard
+      GLPI login form.
+    cve:
+      - CVE-2022-35914
+    match:
+      path: /
+      body_contains: "GLPI"
+    default_credentials:
+      - {username: glpi, password: glpi}
+    auth:
+      type: form
+      path: /front/login.php
+      username_field: login_name
+      password_field: login_password
+      failure_body_contains: "incorrect"
+
+  - id: apache-hugegraph
+    vendor: Apache
+    model_class: Apache HugeGraph graph database server
+    severity: critical
+    description: >-
+      Apache HugeGraph Server is a self-hosted graph-database platform whose
+      internet-facing Gremlin / management API was mass-exploited via an OGNL
+      / Java reflection injection flaw allowing unauthenticated remote code
+      execution (CVE-2024-27348, CISA KEV). Default HugeGraph installs retain
+      the documented admin account on the HugeGraph Hubble management UI
+      login form.
+    cve:
+      - CVE-2024-27348
+    match:
+      path: /
+      body_contains: "HugeGraph"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /apis/login
+      username_field: name
+      password_field: password
+      failure_body_contains: "invalid"

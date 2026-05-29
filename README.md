@@ -132,7 +132,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 144 fingerprint(s) loaded
+hellhound: 152 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -496,7 +496,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 144 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 152 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -608,7 +608,15 @@ CVE-2024-8957), Trend Micro Apex One (CVE-2024-49419), Synology DiskStation
 Manager (CVE-2024-10443), ServiceNow Now Platform (CVE-2024-4879), TP-Link
 Archer C5400X gaming routers (CVE-2024-5035), the WSO2 Carbon management
 console (CVE-2022-29464), and Ruijie Reyee cloud-managed access points /
-gateways (CVE-2024-47547).
+gateways (CVE-2024-47547). An eighteenth tranche covers internet-facing CI/CD
+servers, managed-file-transfer appliances, SIEM and BI platforms, source-
+control servers, network printers, ITSM portals and graph databases mass-
+exploited across the CISA KEV catalog: JetBrains TeamCity (CVE-2024-27198),
+Fortra GoAnywhere MFT (CVE-2024-0204), Splunk Enterprise (CVE-2024-36991),
+Apache Superset (CVE-2023-27524), Atlassian Bitbucket Server / Data Center
+(CVE-2022-43781), Lexmark network printers (CVE-2023-26068), the GLPI IT
+asset / service-management portal (CVE-2022-35914), and Apache HugeGraph
+graph-database server (CVE-2024-27348).
 
 Each file has a top-level `fingerprints` list. An entry:
 
