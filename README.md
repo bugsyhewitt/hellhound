@@ -131,7 +131,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 56 fingerprint(s) loaded
+hellhound: 64 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -435,7 +435,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 56 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 64 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -466,7 +466,13 @@ Replication (CVE-2024-40711), Citrix NetScaler ADC/Gateway
 (CVE-2023-4966 / CVE-2025-5777, CitrixBleed), Progress WS_FTP Server
 (CVE-2023-40044), Adobe ColdFusion (CVE-2023-26360), ConnectWise ScreenConnect
 (CVE-2024-1709), GeoServer (CVE-2024-36401), Roundcube webmail (CVE-2024-37383),
-and PaperCut NG/MF print management (CVE-2023-27350).
+and PaperCut NG/MF print management (CVE-2023-27350). A seventh tranche covers
+internet-facing enterprise web applications and management consoles from the
+2022-2025 CISA KEV / mass-exploitation lists: Zoho ManageEngine
+(CVE-2022-47966), Citrix ShareFile (CVE-2023-24489), Apache OFBiz
+(CVE-2023-49070 / CVE-2024-45195), Openfire XMPP (CVE-2023-32315), SolarWinds
+Orion / Web Help Desk (CVE-2024-28987), Langflow (CVE-2025-3248), Apache Tomcat
+Manager (CVE-2025-24813), and Cacti (CVE-2022-46169).
 
 Each file has a top-level `fingerprints` list. An entry:
 

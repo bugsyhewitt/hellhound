@@ -1077,3 +1077,190 @@ fingerprints:
       path: /app
       username_field: usernameField
       password_field: passwordField
+
+  # --- Phase 2 expansion (seventh tranche): internet-facing enterprise web
+  # applications and management consoles from the 2022-2025 CISA KEV /
+  # mass-exploitation lists (ManageEngine, Citrix ShareFile, Apache OFBiz,
+  # Openfire, SolarWinds, Langflow, Apache Tomcat Manager, Cacti). Recognised
+  # from their web login / admin surface, with the documented default web-admin
+  # credentials checked. None of these device classes were covered by tranches
+  # 1-6. Default credentials verified from vendor documentation and public
+  # advisories. ---
+
+  - id: zoho-manageengine
+    vendor: Zoho
+    model_class: ManageEngine ADSelfService / ADManager / ServiceDesk
+    severity: critical
+    description: >-
+      Zoho ManageEngine products (ADSelfService Plus, ADManager Plus,
+      ServiceDesk Plus) expose an internet-facing web console and were
+      mass-exploited via a SAML authentication-bypass RCE chain
+      (CVE-2022-47966). Default installs ship with the documented
+      admin/admin administrator account.
+    cve:
+      - CVE-2022-47966
+    match:
+      path: /
+      body_contains: "ManageEngine"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /j_security_check
+      username_field: j_username
+      password_field: j_password
+
+  - id: citrix-sharefile
+    vendor: Citrix
+    model_class: ShareFile Storage Zones Controller
+    severity: critical
+    description: >-
+      Citrix ShareFile (Content Collaboration) Storage Zones Controller exposes
+      an internet-facing web upload/management surface and was mass-exploited in
+      2023 via an unauthenticated arbitrary-file-upload RCE (CVE-2023-24489).
+      Default installs ship with the documented admin/password web account.
+    cve:
+      - CVE-2023-24489
+    match:
+      path: /
+      body_contains: "ShareFile"
+    default_credentials:
+      - {username: admin, password: password}
+    auth:
+      type: form
+      path: /auth/login
+      username_field: username
+      password_field: password
+
+  - id: apache-ofbiz
+    vendor: Apache
+    model_class: OFBiz ERP web application
+    severity: critical
+    description: >-
+      Apache OFBiz is an internet-facing ERP/e-business web suite whose admin
+      surface was mass-exploited in 2023-2024 via an authentication-bypass /
+      screen-render RCE chain (CVE-2023-49070 / CVE-2024-45195). The bundled
+      seed data ships with the well-known admin/ofbiz administrator account.
+    cve:
+      - CVE-2023-49070
+      - CVE-2024-45195
+    match:
+      path: /
+      body_contains: "OFBiz"
+    default_credentials:
+      - {username: admin, password: ofbiz}
+    auth:
+      type: form
+      path: /webtools/control/login
+      username_field: USERNAME
+      password_field: PASSWORD
+
+  - id: openfire-xmpp
+    vendor: Ignite Realtime
+    model_class: Openfire XMPP server admin console
+    severity: critical
+    description: >-
+      Openfire is an internet-facing XMPP server whose admin console was
+      mass-exploited in 2023 via a path-traversal authentication bypass
+      (CVE-2023-32315) that lets an attacker reach setup pages and create an
+      admin user. Fresh installs ship with the documented admin/admin account.
+    cve:
+      - CVE-2023-32315
+    match:
+      path: /
+      body_contains: "Openfire"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login.jsp
+      username_field: username
+      password_field: password
+
+  - id: solarwinds-orion
+    vendor: SolarWinds
+    model_class: Orion Platform / Web Help Desk
+    severity: critical
+    description: >-
+      SolarWinds Orion Platform and Web Help Desk expose an internet-facing web
+      console; Web Help Desk shipped with hardcoded backdoor credentials that
+      CISA added to KEV in 2024 (CVE-2024-28987). The Orion web admin commonly
+      retains the documented admin account with a blank password on fresh
+      deployments.
+    cve:
+      - CVE-2024-28987
+    match:
+      path: /
+      body_contains: "SolarWinds"
+    default_credentials:
+      - {username: admin, password: ""}
+    auth:
+      type: form
+      path: /Orion/Login.aspx
+      username_field: ctl00$BodyContent$Username
+      password_field: ctl00$BodyContent$Password
+
+  - id: langflow
+    vendor: Langflow
+    model_class: Langflow LLM workflow builder
+    severity: critical
+    description: >-
+      Langflow is an internet-facing visual LLM-workflow builder that was
+      mass-exploited in 2025 via an unauthenticated code-execution flaw in its
+      code-validation endpoint (CVE-2025-3248, added to CISA KEV). Default
+      installs ship with the documented langflow/langflow superuser account.
+    cve:
+      - CVE-2025-3248
+    match:
+      path: /
+      body_contains: "Langflow"
+    default_credentials:
+      - {username: langflow, password: langflow}
+    auth:
+      type: form
+      path: /api/v1/login
+      username_field: username
+      password_field: password
+
+  - id: apache-tomcat-manager
+    vendor: Apache
+    model_class: Tomcat Manager web application
+    severity: high
+    description: >-
+      Apache Tomcat's /manager web application is a perennial internet-facing
+      target — exposed Manager consoles are continuously scanned for default
+      credentials, and Tomcat itself was mass-exploited in 2025 via a
+      partial-PUT deserialisation RCE (CVE-2025-24813). Many deployments retain
+      the documented tomcat/tomcat manager-gui account.
+    cve:
+      - CVE-2025-24813
+    match:
+      path: /
+      body_contains: "Apache Tomcat"
+    default_credentials:
+      - {username: tomcat, password: tomcat}
+    auth:
+      type: basic
+      path: /manager/html
+
+  - id: cacti
+    vendor: Cacti
+    model_class: Cacti network monitoring web application
+    severity: critical
+    description: >-
+      Cacti is an internet-facing network-monitoring web application whose login
+      surface was mass-exploited in 2022-2023 via an unauthenticated
+      command-injection RCE (CVE-2022-46169, added to CISA KEV). Fresh installs
+      ship with the documented admin/admin administrator account.
+    cve:
+      - CVE-2022-46169
+    match:
+      path: /
+      body_contains: "Cacti"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /index.php
+      username_field: login_username
+      password_field: login_password
