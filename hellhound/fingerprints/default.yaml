@@ -2966,3 +2966,216 @@ fingerprints:
       username_field: username
       password_field: password
       failure_body_contains: "invalid"
+
+  # ---------------------------------------------------------------------------
+  # Seventeenth Phase 2 tranche — additional CISA KEV device classes covering
+  # internet-facing identity, endpoint-protection, ITSM, file-sharing, NAS,
+  # SOHO router, IP camera and SaaS-platform consoles mass-exploited during
+  # 2022-2025. Each entry pins the KEV CVE motivating its inclusion.
+  # ---------------------------------------------------------------------------
+
+  - id: cisco-ssm-on-prem
+    vendor: Cisco
+    model_class: Cisco Smart Software Manager On-Prem
+    severity: critical
+    description: >-
+      Cisco Smart Software Manager On-Prem (SSM On-Prem) is the on-premises
+      licensing portal for Cisco products and exposes an internet-facing web
+      console exploited via a password-change flaw that lets an unauthenticated
+      attacker overwrite any account password — including the administrator's
+      (CVE-2024-20419, CISA KEV). Distinct from the bundled Cisco IOS XE WebUI,
+      ASA WebVPN and RV-series router entries. Default installs retain the
+      documented admin account on the SSM web login.
+    cve:
+      - CVE-2024-20419
+    match:
+      path: /
+      body_contains: "Smart Software Manager"
+    default_credentials:
+      - {username: admin, password: "CiscoAdmin@SSM"}
+    auth:
+      type: form
+      path: /backend/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: ptzoptics-camera
+    vendor: PTZOptics
+    model_class: PTZOptics PT30X-series PTZ camera
+    severity: high
+    description: >-
+      PTZOptics PT30X-SDI / PT30X-NDI pan-tilt-zoom cameras expose an
+      internet-facing web management UI exploited via an unauthenticated
+      OS-command-injection and an authentication-bypass flaw, both seen in
+      mass-exploitation campaigns (CVE-2024-8956 / CVE-2024-8957, CISA KEV).
+      Distinct from the bundled Axis, Hikvision, Dahua and Reolink IP-camera
+      entries. Default cameras retain the documented admin account on the web
+      login.
+    cve:
+      - CVE-2024-8956
+      - CVE-2024-8957
+    match:
+      path: /
+      body_contains: "PTZOptics"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /cgi-bin/param.cgi
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: trend-micro-apex-one
+    vendor: Trend Micro
+    model_class: Trend Micro Apex One management console
+    severity: critical
+    description: >-
+      Trend Micro Apex One is an enterprise endpoint-protection platform whose
+      management console exposes an internet-facing web UI exploited via an
+      origin-validation flaw allowing remote code execution by an authenticated
+      attacker, mass-exploited in 2024 (CVE-2024-49419, CISA KEV). Default
+      installs retain the documented administrator account on the Apex One
+      console login.
+    cve:
+      - CVE-2024-49419
+    match:
+      path: /
+      body_contains: "Apex One"
+    default_credentials:
+      - {username: root, password: "1111"}
+    auth:
+      type: form
+      path: /officescan/console/html/cgi/cgiChkMasterPwd.exe
+      username_field: txtAccount
+      password_field: txtPasswd
+      failure_body_contains: "incorrect"
+
+  - id: synology-dsm
+    vendor: Synology
+    model_class: Synology DiskStation Manager (DSM)
+    severity: high
+    description: >-
+      Synology DiskStation Manager (DSM) is the web UI for Synology NAS
+      appliances and exposes an internet-facing administration portal exploited
+      via an out-of-bounds write in the BeePhotos / Photos package allowing
+      unauthenticated remote code execution (CVE-2024-10443, CISA KEV).
+      Distinct from the bundled QNAP, Western Digital, TerraMaster, D-Link DNS
+      and Zyxel NAS entries. Default installs retain the documented admin
+      account on the DSM login.
+    cve:
+      - CVE-2024-10443
+    match:
+      path: /
+      body_contains: "DiskStation"
+    default_credentials:
+      - {username: admin, password: ""}
+    auth:
+      type: form
+      path: /webman/login.cgi
+      username_field: username
+      password_field: passwd
+      failure_body_contains: "error"
+
+  - id: servicenow-now-platform
+    vendor: ServiceNow
+    model_class: ServiceNow Now Platform ITSM portal
+    severity: critical
+    description: >-
+      ServiceNow Now Platform is a SaaS / on-prem ITSM and workflow portal whose
+      Jelly-template engine exposed an internet-facing instance to an
+      input-validation flaw allowing unauthenticated remote code execution and
+      data disclosure across customer instances (CVE-2024-4879, CISA KEV).
+      Default on-prem installs retain the documented administrator account on
+      the platform login.
+    cve:
+      - CVE-2024-4879
+    match:
+      path: /
+      body_contains: "ServiceNow"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login.do
+      username_field: user_name
+      password_field: user_password
+      failure_body_contains: "invalid"
+
+  - id: tplink-archer
+    vendor: TP-Link
+    model_class: TP-Link Archer C5400X gaming router
+    severity: high
+    description: >-
+      TP-Link Archer C5400X tri-band Wi-Fi 6 gaming routers expose an
+      internet-facing web management UI exploited via an unauthenticated
+      OS-command-injection in the ``rftest`` debug service, mass-exploited in
+      botnet campaigns (CVE-2024-5035, CISA KEV). Distinct from the bundled
+      generic TP-Link SOHO router entry. Default routers retain the documented
+      admin account on the Archer web login.
+    cve:
+      - CVE-2024-5035
+    match:
+      path: /
+      body_contains: "Archer C5400X"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /cgi-bin/luci/;stok=/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "incorrect"
+
+  - id: wso2-carbon
+    vendor: WSO2
+    model_class: WSO2 Carbon management console (API Manager / Identity Server)
+    severity: critical
+    description: >-
+      WSO2 Carbon is the management console shared by WSO2 API Manager,
+      Identity Server, Enterprise Integrator and other WSO2 products. It
+      exposes an internet-facing admin portal exploited via an unrestricted
+      file-upload flaw allowing unauthenticated remote code execution
+      (CVE-2022-29464, CISA KEV) — broadly abused in cryptominer and webshell
+      campaigns. Default deployments retain the documented admin account on
+      the Carbon console login.
+    cve:
+      - CVE-2022-29464
+    match:
+      path: /
+      body_contains: "WSO2"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /carbon/admin/login_action.jsp
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: ruijie-reyee
+    vendor: Ruijie
+    model_class: Ruijie Reyee cloud-managed access point / gateway
+    severity: high
+    description: >-
+      Ruijie Reyee cloud-managed wireless access points and gateways expose an
+      internet-facing web management UI implicated in the "Cloudy with a
+      Chance of RCE" mass-exploitation cluster — a chain of authentication and
+      MQTT message-handling flaws allowing remote takeover of fleets of
+      Reyee devices (CVE-2024-47547 and related, tracked in the CISA KEV
+      catalog). Default devices retain the documented admin account on the
+      Reyee web login.
+    cve:
+      - CVE-2024-47547
+    match:
+      path: /
+      body_contains: "Reyee"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /api/sys/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "fail"
