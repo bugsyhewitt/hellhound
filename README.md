@@ -131,7 +131,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 40 fingerprint(s) loaded
+hellhound: 48 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -435,7 +435,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 40 IoT device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 48 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -453,7 +453,13 @@ campaigns and Mirai variant target lists: Zyxel ZLD VPN firewalls
 controllers (CVE-2023-25717), Edimax IC cameras (CVE-2025-1316), Four-Faith
 industrial cellular routers (CVE-2024-12856), Contec SolarView solar gateways
 (CVE-2022-29303), AVTECH AVM/AVN cameras (CVE-2024-7029), and OptiLink GPON
-ONTs.
+ONTs. A fifth tranche covers enterprise edge appliances and internet-facing
+servers from the 2023-2025 KEV / mass-exploitation lists: Barracuda Email
+Security Gateway (CVE-2023-2868), Cisco IOS XE web UI
+(CVE-2023-20198 / CVE-2023-20273), Progress MOVEit Transfer (CVE-2023-34362),
+Progress Telerik (CVE-2024-4358), Atlassian Confluence (CVE-2023-22515), Ivanti
+Connect Secure (CVE-2023-46805 / CVE-2024-21887), Fortinet FortiGate
+(CVE-2024-21762), and SonicWall Secure Mobile Access (CVE-2024-38475).
 
 Each file has a top-level `fingerprints` list. An entry:
 

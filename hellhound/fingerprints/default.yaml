@@ -708,3 +708,186 @@ fingerprints:
       path: /boaform/admin/formLogin
       username_field: username
       password_field: psd
+
+  # --- Phase 2 expansion (fifth tranche): enterprise edge appliances and
+  # internet-facing servers from the 2023-2025 KEV / mass-exploitation lists
+  # (CISA KEV, Mandiant, GreyNoise). These are managed enterprise targets rather
+  # than consumer IoT — recognised from their web management surface, with the
+  # factory / documented default web-admin credentials checked. Default
+  # credentials verified from vendor documentation and public advisories. ---
+
+  - id: barracuda-esg
+    vendor: Barracuda
+    model_class: Email Security Gateway (ESG)
+    severity: critical
+    description: >-
+      Barracuda Email Security Gateway appliances expose an admin web console
+      that ships with admin/admin. The ESG line was mass-exploited in 2023 via a
+      zero-day in attachment parsing (CVE-2023-2868).
+    cve:
+      - CVE-2023-2868
+    match:
+      path: /
+      body_contains: "barracuda"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /cgi-mod/index.cgi
+      username_field: user
+      password_field: password
+
+  - id: cisco-ios-xe-webui
+    vendor: Cisco
+    model_class: IOS XE web management UI
+    severity: critical
+    description: >-
+      Cisco IOS XE devices with the HTTP/HTTPS web UI (WebUI) enabled were
+      mass-exploited in late 2023 to create rogue privileged accounts
+      (CVE-2023-20198 / CVE-2023-20273). The factory default web account on many
+      deployments is cisco/cisco.
+    cve:
+      - CVE-2023-20198
+      - CVE-2023-20273
+    match:
+      path: /
+      body_contains: "/webui/"
+    default_credentials:
+      - {username: cisco, password: cisco}
+    auth:
+      type: form
+      path: /webui/login
+      username_field: user
+      password_field: password
+
+  - id: moveit-transfer
+    vendor: Progress
+    model_class: Managed file transfer (MOVEit Transfer)
+    severity: critical
+    description: >-
+      Progress MOVEit Transfer is an internet-facing managed file transfer
+      server whose web portal was mass-exploited in 2023 (CVE-2023-34362,
+      Cl0p campaign). Installations seeded with the documented default
+      admin/admin web account remain exposed.
+    cve:
+      - CVE-2023-34362
+    match:
+      path: /
+      body_contains: "MOVEit"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /api/v1/token
+      username_field: username
+      password_field: password
+
+  - id: telerik-ui
+    vendor: Progress
+    model_class: Telerik UI / Report Server web app
+    severity: high
+    description: >-
+      Progress Telerik Report Server exposes a web admin console; default
+      installations ship with an admin/admin account, and the product line was
+      exploited in 2024 via an authentication-bypass / deserialisation chain
+      (CVE-2024-4358).
+    cve:
+      - CVE-2024-4358
+    match:
+      path: /
+      body_contains: "Telerik"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /Account/Login
+      username_field: Username
+      password_field: Password
+
+  - id: atlassian-confluence
+    vendor: Atlassian
+    model_class: Confluence Data Center / Server
+    severity: critical
+    description: >-
+      Atlassian Confluence Data Center / Server was mass-exploited in 2023 via a
+      broken-access-control flaw allowing creation of admin accounts
+      (CVE-2023-22515). Self-hosted instances commonly retain the admin/admin
+      setup account.
+    cve:
+      - CVE-2023-22515
+    match:
+      path: /
+      body_contains: "Confluence"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /dologin.action
+      username_field: os_username
+      password_field: os_password
+
+  - id: ivanti-connect-secure
+    vendor: Ivanti
+    model_class: Connect Secure / Policy Secure VPN
+    severity: critical
+    description: >-
+      Ivanti Connect Secure (formerly Pulse Connect Secure) SSL VPN gateways
+      were mass-exploited across 2023-2024 (CVE-2023-46805 / CVE-2024-21887 and
+      follow-on chains). Lab and staging deployments commonly retain the
+      admin/admin administrator portal account.
+    cve:
+      - CVE-2023-46805
+      - CVE-2024-21887
+    match:
+      path: /
+      body_contains: "/dana-na/"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /dana-na/auth/url_admin/login.cgi
+      username_field: username
+      password_field: password
+
+  - id: fortinet-fortigate
+    vendor: Fortinet
+    model_class: FortiGate / FortiOS firewall
+    severity: critical
+    description: >-
+      Fortinet FortiGate (FortiOS) firewalls expose a web management UI and were
+      repeatedly mass-exploited across 2023-2024 (CVE-2024-21762 and related
+      pre-auth chains). Out-of-the-box appliances ship with admin and a blank
+      password until first login.
+    cve:
+      - CVE-2024-21762
+    match:
+      path: /
+      body_contains: "/login?redir="
+    default_credentials:
+      - {username: admin, password: ""}
+    auth:
+      type: form
+      path: /logincheck
+      username_field: username
+      password_field: secretkey
+
+  - id: sonicwall-sma
+    vendor: SonicWall
+    model_class: Secure Mobile Access (SMA) / SSL VPN
+    severity: critical
+    description: >-
+      SonicWall Secure Mobile Access (SMA 100 series) SSL VPN appliances were
+      mass-exploited in 2023-2024 (CVE-2024-38475 and related chains). The
+      management console ships with the documented admin/password default.
+    cve:
+      - CVE-2024-38475
+    match:
+      path: /
+      body_contains: "SonicWall"
+    default_credentials:
+      - {username: admin, password: password}
+    auth:
+      type: form
+      path: /__api__/v1/logon
+      username_field: username
+      password_field: password

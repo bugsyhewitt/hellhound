@@ -10,6 +10,18 @@ lap; Workers implement exactly one improvement per lap.
 
 ### 1. Expand the fingerprint database — 10+ high-value new entries (PRIORITY) — ✅ IMPLEMENTED (Phase 2, Rotation 2)
 
+**Tranche 5 update (Rotation 16):** Added 8 enterprise edge-appliance / server
+device classes from the 2023-2025 KEV / mass-exploitation lists (database now
+**48 entries**): Barracuda Email Security Gateway (CVE-2023-2868), Cisco IOS XE
+web UI (CVE-2023-20198 / CVE-2023-20273), Progress MOVEit Transfer
+(CVE-2023-34362), Progress Telerik (CVE-2024-4358), Atlassian Confluence
+(CVE-2023-22515), Ivanti Connect Secure (CVE-2023-46805 / CVE-2024-21887),
+Fortinet FortiGate (CVE-2024-21762), and SonicWall Secure Mobile Access
+(CVE-2024-38475). Each has a mock-transport unit test in
+`tests/test_fingerprints_phase2_tranche5.py` proving fingerprint match and
+default-credential authentication, plus a matched-but-rotated guard test. No
+engine changes.
+
 **Status:** Done. All 12 new fingerprints below were added to
 `hellhound/fingerprints/default.yaml` (database now 24 entries), each with a
 mock-transport unit test in `tests/test_fingerprints_phase2.py` proving
