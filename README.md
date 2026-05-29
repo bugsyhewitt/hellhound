@@ -131,7 +131,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 24 fingerprint(s) loaded
+hellhound: 32 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -435,14 +435,18 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 24 IoT device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 32 IoT device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
 Axis cameras, Grandstream phones/APs, HPE Aruba Instant On APs
 (CVE-2025-37103), Tenda, ASUS, Linksys WRT and NETGEAR Orbi routers, Amcrest
 NVRs, Moxa NPort serial servers, and GeoVision DVRs
-(CVE-2024-6047 / CVE-2024-11120).
+(CVE-2024-6047 / CVE-2024-11120). A third tranche covers device classes seen in
+2024-2025 mass-exploitation campaigns: TBK DVRs (CVE-2024-3721), TOTOLINK
+routers (CVE-2024-7029), Uniview NVRs, Hanwha Wisenet cameras, QNAP and Western
+Digital My Cloud NAS appliances, newer-default Hikvision ISAPI cameras
+(admin/admin12345), and Cisco RV-series small-business routers.
 
 Each file has a top-level `fingerprints` list. An entry:
 
