@@ -132,7 +132,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 128 fingerprint(s) loaded
+hellhound: 136 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -496,7 +496,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 128 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 136 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -591,7 +591,15 @@ mass-exploited across the CISA KEV catalog: SonicWall SonicOS SSL-VPN
 GPON home routers (CVE-2018-10561 / CVE-2018-10562), VMware Workspace ONE Access
 (CVE-2022-22954), Nortek Linear eMerge E3 access-control panels (CVE-2019-7256),
 Microsoft SharePoint Server (CVE-2023-29357), D-Link DIR-series routers
-(CVE-2024-0769), and the DNN Platform / DotNetNuke CMS (CVE-2017-9822).
+(CVE-2024-0769), and the DNN Platform / DotNetNuke CMS (CVE-2017-9822). A
+sixteenth tranche covers internet-facing unified-communications consoles, CMS
+control panels, file-sharing portals, SIEM dashboards and device web UIs
+mass-exploited across the 2024-2025 CISA KEV catalog: Fortinet FortiVoice
+(CVE-2025-32756), SAP NetWeaver Visual Composer (CVE-2025-31324), Sitecore
+Experience Platform (CVE-2025-34509 / CVE-2025-27218), the Wazuh security
+platform (CVE-2025-24016), Craft CMS (CVE-2025-23209), Gladinet CentreStack /
+Triofox (CVE-2025-30406), Ivanti Endpoint Manager (CVE-2024-29824), and Mitel
+6800 / 6900-series SIP desk phones (CVE-2024-41710).
 
 Each file has a top-level `fingerprints` list. An entry:
 
