@@ -211,7 +211,8 @@ JSON output groups a summary with per-device findings:
   "summary": {
     "devices_matched": 1,
     "devices_with_default_creds": 1,
-    "only_vulnerable": false
+    "only_vulnerable": false,
+    "hosts_scanned": 254
   },
   "findings": [
     {
@@ -235,6 +236,21 @@ JSON output groups a summary with per-device findings:
 A finding with `"default_creds": true` is the actionable result: that device
 still accepts the listed default credentials and should be reconfigured.
 
+The `summary` also reports `hosts_scanned` — the number of hosts actually
+probed after CIDR expansion and any `--exclude` filtering. This is the sweep
+denominator: "matched 1 of 254 scanned" is very different from "matched 1 of 1
+scanned", and the count is what lets you reason about coverage when you open a
+saved report later. The `--progress` line shows the same total live on stderr,
+but that disappears once output is piped to a file, so the count is carried in
+the persistent json/text summary too. The text format leads with it:
+
+```text
+hellhound: 254 host(s) scanned, 1 device(s) matched, 1 with default creds
+```
+
+(The CSV format is one row per finding and carries no summary block, so the
+count does not appear there.)
+
 Each finding also carries a `cve` list. When the matched fingerprint is linked
 to one or more published CVEs (for example HPE Aruba Instant On
 `CVE-2025-37103` or GeoVision `CVE-2024-6047`), they appear here so the finding
@@ -255,15 +271,17 @@ hellhound --target 192.0.2.0/24 --only-vulnerable
 The findings list is filtered to entries where `default_creds` is `true`, but
 the `summary` still reports the full picture so you don't lose situational
 awareness — `devices_matched` is the total that matched a fingerprint,
-`devices_with_default_creds` is how many of those were exposed, and
-`only_vulnerable` records that digest mode was applied:
+`devices_with_default_creds` is how many of those were exposed,
+`only_vulnerable` records that digest mode was applied, and `hosts_scanned`
+keeps the sweep denominator even though the findings list is trimmed:
 
 ```json
 {
   "summary": {
     "devices_matched": 37,
     "devices_with_default_creds": 4,
-    "only_vulnerable": true
+    "only_vulnerable": true,
+    "hosts_scanned": 65534
   },
   "findings": [
     { "host": "192.0.2.10", "default_creds": true, "vendor": "Hikvision", "...": "..." }

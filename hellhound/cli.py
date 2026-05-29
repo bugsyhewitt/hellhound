@@ -416,13 +416,25 @@ def format_sarif(findings: list[Finding]) -> str:
     return json.dumps(document, indent=2)
 
 
-def _render(findings: list[Finding], fmt: str, only_vulnerable: bool = False) -> str:
+def _render(
+    findings: list[Finding],
+    fmt: str,
+    only_vulnerable: bool = False,
+    hosts_scanned: int | None = None,
+) -> str:
     """Render findings to a string in the requested format.
 
     When *only_vulnerable* is True (digest mode), the rendered findings list is
     filtered to entries with confirmed default credentials. The summary counts
     always reflect the full match set so the operator still sees how many
     devices matched a fingerprint versus how many were exposed.
+
+    *hosts_scanned*, when provided, is the number of hosts actually probed
+    (after CIDR expansion and exclusion filtering) and is surfaced in the
+    json/text summary as the sweep denominator — "matched X of Y scanned". It
+    defaults to ``None``, in which case the field is omitted entirely, so a
+    caller that doesn't know the count (e.g. rendering a bare findings list)
+    keeps the original summary shape.
     """
     flagged = [f for f in findings if f.default_creds]
     # The displayed findings are the digest subset when requested.
@@ -433,12 +445,15 @@ def _render(findings: list[Finding], fmt: str, only_vulnerable: bool = False) ->
         return format_sarif(findings)
 
     if fmt == "json":
+        summary: dict = {
+            "devices_matched": len(findings),
+            "devices_with_default_creds": len(flagged),
+            "only_vulnerable": only_vulnerable,
+        }
+        if hosts_scanned is not None:
+            summary["hosts_scanned"] = hosts_scanned
         payload = {
-            "summary": {
-                "devices_matched": len(findings),
-                "devices_with_default_creds": len(flagged),
-                "only_vulnerable": only_vulnerable,
-            },
+            "summary": summary,
             "findings": [f.to_dict() for f in shown],
         }
         return json.dumps(payload, indent=2)
@@ -471,7 +486,11 @@ def _render(findings: list[Finding], fmt: str, only_vulnerable: bool = False) ->
 
     # text
     lines: list[str] = []
-    lines.append(f"hellhound: {len(findings)} device(s) matched, {len(flagged)} with default creds")
+    scanned = f"{hosts_scanned} host(s) scanned, " if hosts_scanned is not None else ""
+    lines.append(
+        f"hellhound: {scanned}{len(findings)} device(s) matched, "
+        f"{len(flagged)} with default creds"
+    )
     for f in shown:
         status = "DEFAULT-CREDS" if f.default_creds else "matched (creds rotated)"
         cred = f"  creds: {f.matched_credential}" if f.matched_credential else ""
@@ -490,6 +509,7 @@ def format_output(
     fmt: str,
     stream: TextIO | None = None,
     only_vulnerable: bool = False,
+    hosts_scanned: int | None = None,
 ) -> str | None:
     """Format findings.
 
@@ -500,8 +520,15 @@ def format_output(
     When *only_vulnerable* is True, the rendered findings are restricted to
     confirmed default-credential exposures (digest mode); summary counts are
     unaffected.
+
+    *hosts_scanned*, when provided, is added to the json/text summary as the
+    sweep denominator (the number of hosts probed after expansion/exclusion).
+    Defaults to ``None``, which omits the field and preserves the original
+    summary shape.
     """
-    rendered = _render(findings, fmt, only_vulnerable=only_vulnerable)
+    rendered = _render(
+        findings, fmt, only_vulnerable=only_vulnerable, hosts_scanned=hosts_scanned
+    )
     if stream is None:
         return rendered
     stream.write(rendered)
@@ -669,12 +696,20 @@ def main(argv: list[str] | None = None) -> int:
         )
     )
 
+    # The number of hosts actually probed (post expansion/exclusion). Reported
+    # in the summary so the persistent output artefact carries the sweep
+    # denominator even when the transient stderr progress line is off.
+    hosts_scanned = scanner.last_hosts_scanned
+
     if args.output_file is None:
         # stdout: csv module wants newline="" but sys.stdout is already managed;
         # render to a string and print so behaviour is unchanged for json/text.
         print(
             format_output(
-                findings, args.format, only_vulnerable=args.only_vulnerable
+                findings,
+                args.format,
+                only_vulnerable=args.only_vulnerable,
+                hosts_scanned=hosts_scanned,
             )
         )
         return resolve_exit_code(findings, args.exit_code)
@@ -688,6 +723,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.format,
                 stream=fh,
                 only_vulnerable=args.only_vulnerable,
+                hosts_scanned=hosts_scanned,
             )
     except OSError as exc:
         print(f"error: could not write output file: {exc}", file=sys.stderr)

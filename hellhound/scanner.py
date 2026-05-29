@@ -127,6 +127,12 @@ class Scanner:
         self._rate_lock = asyncio.Lock()
         # Monotonic timestamp at which the next request is allowed to fire.
         self._next_allowed = 0.0
+        # Number of hosts probed by the most recent ``scan`` call, after target
+        # expansion and exclusion filtering. ``None`` until the first scan. The
+        # CLI reads it to report the sweep denominator ("matched X of Y
+        # scanned") in the output summary, which is otherwise invisible once
+        # the transient stderr progress line is off (e.g. piped to a file).
+        self.last_hosts_scanned: int | None = None
 
     # ------------------------------------------------------------------ exclusions
 
@@ -228,6 +234,9 @@ class Scanner:
             hosts = [h for h in hosts if not self.is_excluded(h, exclusions)]
 
         total = len(hosts)
+        # Record the post-exclusion host count so the caller can report the
+        # sweep denominator after the scan completes.
+        self.last_hosts_scanned = total
         done = 0
         flagged = 0
 
