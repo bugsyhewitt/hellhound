@@ -132,7 +132,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 96 fingerprint(s) loaded
+hellhound: 104 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -496,7 +496,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 96 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 104 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -559,7 +559,15 @@ the 2024-2025 CISA KEV / ransomware landscape: Cleo Harmony / VLTrader / LexiCom
 (CVE-2024-50623, Cl0p), TerraMaster NAS (CVE-2024-22366), VMware ESXi host
 client (ESXiArgs), Palo Alto Expedition (CVE-2024-5910), Magento / Adobe
 Commerce (CVE-2024-34102, CosmicSting), Aviatrix Controller (CVE-2024-50603),
-F5 BIG-IP TMUI (CVE-2023-46747), and Kibana (CVE-2024-37287).
+F5 BIG-IP TMUI (CVE-2023-46747), and Kibana (CVE-2024-37287). A twelfth tranche
+covers internet-facing edge gateways, SD-WAN and remote-support consoles,
+government asset-management portals, unified-communications servers, and VPN /
+firewall management UIs mass-exploited across the 2023-2025 CISA KEV catalog:
+Ivanti Cloud Services Appliance (CVE-2024-8190 / CVE-2024-8963), Versa Director
+(CVE-2024-39717, VersaMem), Trimble Cityworks (CVE-2025-0994), SimpleHelp
+(CVE-2024-57727), Mitel MiCollab (CVE-2024-41713), BeyondTrust Privileged Remote
+Access (CVE-2024-12356), Cisco ASA / FTD WebVPN (CVE-2024-20353 /
+CVE-2024-20359, ArcaneDoor), and Juniper Junos J-Web (CVE-2023-36844).
 
 Each file has a top-level `fingerprints` list. An entry:
 

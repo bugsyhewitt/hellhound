@@ -2007,3 +2007,190 @@ fingerprints:
       username_field: username
       password_field: password
       failure_body_contains: "Invalid"
+
+  - id: ivanti-csa
+    vendor: Ivanti
+    model_class: Cloud Services Appliance admin portal
+    severity: critical
+    description: >-
+      Ivanti Cloud Services Appliance (CSA) is an internet-facing edge gateway
+      mass-exploited in 2024 via an admin-bypass and command-injection chain
+      (CVE-2024-8190 / CVE-2024-8963, CISA KEV). Default deployments ship the
+      documented admin account on the CSA web portal.
+    cve:
+      - CVE-2024-8190
+      - CVE-2024-8963
+    match:
+      path: /
+      body_contains: "Cloud Services Appliance"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /client/index.php
+      username_field: username
+      password_field: password
+      failure_body_contains: "error"
+
+  - id: versa-director
+    vendor: Versa Networks
+    model_class: Versa Director SD-WAN management console
+    severity: critical
+    description: >-
+      Versa Director is an internet-facing SD-WAN orchestration console
+      mass-exploited in 2024 via an unrestricted file-upload RCE flaw
+      (CVE-2024-39717, "VersaMem", CISA KEV). Default deployments ship the
+      documented administrator account on the management UI.
+    cve:
+      - CVE-2024-39717
+    match:
+      path: /
+      body_contains: "Versa Director"
+    default_credentials:
+      - {username: Administrator, password: "versa123"}
+    auth:
+      type: form
+      path: /versa/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: trimble-cityworks
+    vendor: Trimble
+    model_class: Trimble Cityworks asset-management portal
+    severity: high
+    description: >-
+      Trimble Cityworks is an internet-facing local-government asset and
+      work-order management portal exploited in early 2025 via a deserialisation
+      RCE flaw (CVE-2025-0994, CISA KEV). Default installs ship the documented
+      administrator account on the web login.
+    cve:
+      - CVE-2025-0994
+    match:
+      path: /
+      body_contains: "Cityworks"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /Login/Authenticate
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: simplehelp-remote
+    vendor: SimpleHelp
+    model_class: SimpleHelp remote-support server
+    severity: critical
+    description: >-
+      SimpleHelp is an internet-facing remote-support and remote-access server
+      mass-exploited in early 2025 via a path-traversal and privilege-escalation
+      chain (CVE-2024-57727, CISA KEV). Default deployments ship the documented
+      administrator account on the technician console.
+    cve:
+      - CVE-2024-57727
+    match:
+      path: /
+      body_contains: "SimpleHelp"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /authenticate
+      username_field: username
+      password_field: password
+      failure_body_contains: "incorrect"
+
+  - id: mitel-micollab
+    vendor: Mitel
+    model_class: Mitel MiCollab unified-communications portal
+    severity: high
+    description: >-
+      Mitel MiCollab is an internet-facing unified-communications and
+      collaboration portal exploited in late 2024 via an authentication-bypass
+      and path-traversal chain (CVE-2024-41713, CISA KEV). Default deployments
+      ship the documented administrator account on the AWV / NuPoint web login.
+    cve:
+      - CVE-2024-41713
+    match:
+      path: /
+      body_contains: "MiCollab"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /awc/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "failed"
+
+  - id: beyondtrust-pra
+    vendor: BeyondTrust
+    model_class: BeyondTrust Privileged Remote Access / Remote Support
+    severity: critical
+    description: >-
+      BeyondTrust Privileged Remote Access (PRA) and Remote Support appliances
+      expose an internet-facing administration interface compromised in late 2024
+      via a command-injection flaw (CVE-2024-12356, CISA KEV). Default appliance
+      installs ship the documented administrator account on the /login portal.
+    cve:
+      - CVE-2024-12356
+    match:
+      path: /
+      body_contains: "BeyondTrust"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login
+      username_field: username
+      password_field: password
+      failure_body_contains: "denied"
+
+  - id: cisco-asa-webvpn
+    vendor: Cisco
+    model_class: Cisco ASA / FTD WebVPN (Clientless SSL VPN) portal
+    severity: critical
+    description: >-
+      Cisco Adaptive Security Appliance (ASA) and Firepower Threat Defense (FTD)
+      devices expose an internet-facing WebVPN / Clientless SSL VPN portal
+      targeted in the 2024 "ArcaneDoor" campaign (CVE-2024-20353 /
+      CVE-2024-20359, CISA KEV). Lab and default deployments commonly leave the
+      documented admin account active on the management web login.
+    cve:
+      - CVE-2024-20353
+      - CVE-2024-20359
+    match:
+      path: /
+      body_contains: "WebVPN"
+    default_credentials:
+      - {username: cisco, password: cisco}
+    auth:
+      type: form
+      path: /+webvpn+/index.html
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: juniper-jweb
+    vendor: Juniper Networks
+    model_class: Juniper Junos OS J-Web management interface
+    severity: critical
+    description: >-
+      Juniper SRX firewalls and EX switches expose the Junos OS J-Web management
+      interface, mass-exploited in 2023 via a pre-auth PHP RCE chain
+      (CVE-2023-36844 and related, CISA KEV). Default and lab deployments commonly
+      retain the documented root account on the J-Web login.
+    cve:
+      - CVE-2023-36844
+    match:
+      path: /
+      body_contains: "J-Web"
+    default_credentials:
+      - {username: root, password: juniper123}
+    auth:
+      type: form
+      path: /webauth_operation.php
+      username_field: username
+      password_field: password
+      failure_body_contains: "incorrect"
