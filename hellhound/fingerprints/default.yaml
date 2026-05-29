@@ -2576,3 +2576,196 @@ fingerprints:
       username_field: username
       password_field: password
       failure_body_contains: "invalid"
+
+  - id: sonicwall-sonicos
+    vendor: SonicWall
+    model_class: SonicWall SonicOS firewall / SSL-VPN management UI
+    severity: critical
+    description: >-
+      SonicWall firewalls expose an internet-facing SonicOS management /
+      SSL-VPN web interface affected in 2024 by an improper-access-control flaw
+      (CVE-2024-40766, CISA KEV) abused by ransomware operators for initial
+      access. Default and lab appliance installs retain the documented admin
+      account on the SonicOS login form. Distinct from the bundled SonicWall SMA
+      entry.
+    cve:
+      - CVE-2024-40766
+    match:
+      path: /
+      body_contains: "SonicWall"
+    default_credentials:
+      - {username: admin, password: password}
+    auth:
+      type: form
+      path: /api/sonicos/auth
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: fortinet-fortiwlm
+    vendor: Fortinet
+    model_class: Fortinet FortiWLM wireless LAN manager console
+    severity: critical
+    description: >-
+      Fortinet FortiWLM (Wireless LAN Manager) exposes an internet-facing
+      management console affected by a hard-coded / static-key authentication
+      flaw (CVE-2023-34990, CISA KEV) enabling unauthenticated administrative
+      access. Default appliance installs retain the documented admin account on
+      the FortiWLM login.
+    cve:
+      - CVE-2023-34990
+    match:
+      path: /
+      body_contains: "FortiWLM"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /ems/cli/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: dasan-gpon-router
+    vendor: Dasan
+    model_class: Dasan / ZNID GPON home router web UI
+    severity: critical
+    description: >-
+      Dasan-based GPON home routers expose an internet-facing web management
+      interface mass-exploited by Mirai variants via an authentication-bypass
+      and command-injection chain (CVE-2018-10561 / CVE-2018-10562, CISA KEV).
+      Default ISP-shipped units retain the documented admin account on the GPON
+      login.
+    cve:
+      - CVE-2018-10561
+      - CVE-2018-10562
+    match:
+      path: /
+      body_contains: "GPON"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login.cgi
+      username_field: XWebPageName
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: vmware-workspace-one-access
+    vendor: VMware
+    model_class: VMware Workspace ONE Access / Identity Manager console
+    severity: critical
+    description: >-
+      VMware Workspace ONE Access (formerly Identity Manager) exposes an
+      internet-facing administration console mass-exploited in 2022 via a
+      server-side template-injection remote-code-execution flaw
+      (CVE-2022-22954, CISA KEV). Default appliance installs retain the
+      documented admin account on the Workspace ONE login.
+    cve:
+      - CVE-2022-22954
+    match:
+      path: /
+      body_contains: "Workspace ONE"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /SAAS/API/1.0/REST/auth/system/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: nortek-linear-emerge
+    vendor: Nortek
+    model_class: Nortek Linear eMerge E3 access-control panel
+    severity: critical
+    description: >-
+      Nortek Linear eMerge E3-Series access-control panels expose an
+      internet-facing web interface mass-exploited by IoT botnets via an
+      unauthenticated command-injection flaw (CVE-2019-7256, CISA KEV). Default
+      panels retain the documented admin account on the eMerge login.
+    cve:
+      - CVE-2019-7256
+    match:
+      path: /
+      body_contains: "eMerge"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /card_scan.php
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: microsoft-sharepoint
+    vendor: Microsoft
+    model_class: Microsoft SharePoint Server web portal
+    severity: critical
+    description: >-
+      Microsoft SharePoint Server exposes an internet-facing collaboration
+      portal mass-exploited via a privilege-escalation / spoofing flaw
+      (CVE-2023-29357, CISA KEV) chained for remote code execution. Lab and
+      default farm installs retain the documented administrator account on the
+      SharePoint forms login.
+    cve:
+      - CVE-2023-29357
+    match:
+      path: /
+      body_contains: "SharePoint"
+    default_credentials:
+      - {username: administrator, password: "P@ssw0rd"}
+    auth:
+      type: form
+      path: /_layouts/15/Authenticate.aspx
+      username_field: username
+      password_field: password
+      failure_body_contains: "incorrect"
+
+  - id: dlink-dir-router
+    vendor: D-Link
+    model_class: D-Link DIR-series SOHO router web UI
+    severity: high
+    description: >-
+      D-Link DIR-series SOHO routers expose an internet-facing web management
+      interface affected by an OS command-injection flaw in the HNAP / CGI
+      handler (CVE-2024-0769, CISA KEV) abused by Mirai variants. Default units
+      retain the documented admin account on the router login. Distinct from the
+      bundled D-Link DNS-series NAS entry.
+    cve:
+      - CVE-2024-0769
+    match:
+      path: /
+      body_contains: "DIR-"
+    default_credentials:
+      - {username: admin, password: ""}
+    auth:
+      type: form
+      path: /HNAP1/
+      username_field: Login
+      password_field: Password
+      failure_body_contains: "invalid"
+
+  - id: dotnetnuke-dnn
+    vendor: DNN
+    model_class: DNN Platform (DotNetNuke) CMS admin portal
+    severity: high
+    description: >-
+      DNN Platform (formerly DotNetNuke) exposes an internet-facing content
+      management portal mass-exploited via an insecure-deserialization
+      remote-code-execution flaw in the cookie handler (CVE-2017-9822,
+      "DNNPersonalization", CISA KEV). Default installs retain the documented
+      host administrator account on the DNN login.
+    cve:
+      - CVE-2017-9822
+    match:
+      path: /
+      body_contains: "DotNetNuke"
+    default_credentials:
+      - {username: host, password: dnnhost}
+    auth:
+      type: form
+      path: /Login
+      username_field: txtUsername
+      password_field: txtPassword
+      failure_body_contains: "invalid"

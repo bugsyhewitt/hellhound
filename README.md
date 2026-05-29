@@ -132,7 +132,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 120 fingerprint(s) loaded
+hellhound: 128 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -496,7 +496,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 120 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 128 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -583,7 +583,15 @@ ProxyLogon), Oracle WebLogic Server admin console (CVE-2020-14882), Apache
 ActiveMQ web console (CVE-2023-46604), Ivanti Sentry / MobileIron Sentry
 (CVE-2023-38035), Sophos Web Appliance (CVE-2023-1671), WatchGuard Firebox /
 Fireware (CVE-2022-26318, Cyclops Blink), Zoho ManageEngine ADSelfService Plus
-(CVE-2021-40539), and the Progress Flowmon monitoring console (CVE-2024-2389).
+(CVE-2021-40539), and the Progress Flowmon monitoring console (CVE-2024-2389). A
+fifteenth tranche covers internet-facing firewalls, wireless managers, SOHO
+routers, identity portals, access-control panels and CMS admin consoles
+mass-exploited across the CISA KEV catalog: SonicWall SonicOS SSL-VPN
+(CVE-2024-40766), Fortinet FortiWLM wireless LAN manager (CVE-2023-34990), Dasan
+GPON home routers (CVE-2018-10561 / CVE-2018-10562), VMware Workspace ONE Access
+(CVE-2022-22954), Nortek Linear eMerge E3 access-control panels (CVE-2019-7256),
+Microsoft SharePoint Server (CVE-2023-29357), D-Link DIR-series routers
+(CVE-2024-0769), and the DNN Platform / DotNetNuke CMS (CVE-2017-9822).
 
 Each file has a top-level `fingerprints` list. An entry:
 
