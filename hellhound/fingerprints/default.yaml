@@ -1821,3 +1821,189 @@ fingerprints:
       username_field: userName
       password_field: password
       failure_body_contains: "error"
+
+  # --- Tranche 11: 2024-2025 mass-exploitation / CISA KEV device classes -----
+
+  - id: cleo-harmony
+    vendor: Cleo
+    model_class: Cleo Harmony / VLTrader / LexiCom managed file transfer
+    severity: critical
+    description: >-
+      Cleo Harmony, VLTrader and LexiCom are internet-facing managed file
+      transfer servers mass-exploited in late 2024 via an unauthenticated
+      arbitrary file-write / RCE chain (CVE-2024-50623, CISA KEV) used by the
+      Cl0p ransomware group. Default on-premises installs expose the documented
+      administrator account on the web administration console.
+    cve:
+      - CVE-2024-50623
+    match:
+      path: /
+      body_contains: "Cleo"
+    default_credentials:
+      - {username: administrator, password: Admin1234}
+    auth:
+      type: form
+      path: /Synchronization/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "error"
+
+  - id: terramaster-nas
+    vendor: TerraMaster
+    model_class: TerraMaster TOS NAS storage appliance
+    severity: critical
+    description: >-
+      TerraMaster NAS devices run the internet-facing TOS web operating system
+      and were mass-exploited in 2024 via an unauthenticated command-injection
+      chain (CVE-2024-22366). Default deployments ship the documented admin
+      account on the TOS web login.
+    cve:
+      - CVE-2024-22366
+    match:
+      path: /
+      body_contains: "TerraMaster"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /tos/index.php?user/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "error"
+
+  - id: vmware-esxi-hostclient
+    vendor: VMware
+    model_class: VMware ESXi host client hypervisor management
+    severity: critical
+    description: >-
+      VMware ESXi hosts expose an internet-facing host-client web UI and were
+      mass-encrypted across 2023-2025 by the ESXiArgs and successor ransomware
+      campaigns. Default standalone installs ship the documented root account on
+      the host-client login, granting full hypervisor control if left unrotated.
+    match:
+      path: /
+      body_contains: "ESXi"
+    default_credentials:
+      - {username: root, password: vmware}
+    auth:
+      type: form
+      path: /ui/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "error"
+
+  - id: paloalto-expedition
+    vendor: Palo Alto
+    model_class: Palo Alto Expedition migration tool
+    severity: critical
+    description: >-
+      Palo Alto Networks Expedition is an internet-facing firewall-migration
+      tool mass-exploited in 2024 via an authentication-bypass / command-injection
+      chain (CVE-2024-5910 / CVE-2024-9464, CISA KEV). Default installs ship the
+      documented admin account on the web console.
+    cve:
+      - CVE-2024-5910
+    match:
+      path: /
+      body_contains: "Expedition"
+    default_credentials:
+      - {username: admin, password: paloalto}
+    auth:
+      type: form
+      path: /OS/startup/login.php
+      username_field: username
+      password_field: password
+      failure_body_contains: "error"
+
+  - id: magento-admin
+    vendor: Adobe
+    model_class: Magento / Adobe Commerce admin console
+    severity: high
+    description: >-
+      Magento Open Source and Adobe Commerce power internet-facing e-commerce
+      storefronts mass-exploited in 2024 via an unauthenticated information-disclosure
+      / RCE chain (CVE-2024-34102, "CosmicSting", CISA KEV). Default and demo
+      installs ship the documented administrator account on the /admin panel.
+    cve:
+      - CVE-2024-34102
+    match:
+      path: /
+      body_contains: "Magento"
+    default_credentials:
+      - {username: admin, password: admin123}
+    auth:
+      type: form
+      path: /admin/admin/index/index/
+      username_field: login[username]
+      password_field: login[password]
+      failure_body_contains: "incorrect"
+
+  - id: aviatrix-controller
+    vendor: Aviatrix
+    model_class: Aviatrix Controller cloud-networking console
+    severity: critical
+    description: >-
+      Aviatrix Controller is an internet-facing multi-cloud networking management
+      console mass-exploited in early 2025 via an unauthenticated OS
+      command-injection flaw (CVE-2024-50603, CISA KEV). Default deployments ship
+      the documented admin account on the web console.
+    cve:
+      - CVE-2024-50603
+    match:
+      path: /
+      body_contains: "Aviatrix"
+    default_credentials:
+      - {username: admin, password: "Aviatrix123#"}
+    auth:
+      type: form
+      path: /v1/api
+      username_field: username
+      password_field: password
+      failure_body_contains: "error"
+
+  - id: f5-bigip-tmui
+    vendor: F5
+    model_class: F5 BIG-IP TMUI configuration utility
+    severity: critical
+    description: >-
+      F5 BIG-IP application delivery controllers expose an internet-facing
+      Traffic Management User Interface (TMUI) repeatedly mass-exploited via
+      authentication-bypass / RCE chains (CVE-2023-46747, CVE-2022-1388, CISA
+      KEV). Default appliance installs ship the documented admin account on the
+      TMUI login.
+    cve:
+      - CVE-2023-46747
+    match:
+      path: /
+      body_contains: "BIG-IP"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /tmui/logmein.html
+      username_field: username
+      password_field: passwd
+      failure_body_contains: "denied"
+
+  - id: kibana-dashboard
+    vendor: Elastic
+    model_class: Kibana analytics / Elasticsearch dashboard
+    severity: high
+    description: >-
+      Kibana is the internet-facing analytics and management dashboard for
+      Elasticsearch, exploited in 2024 via a prototype-pollution RCE chain
+      (CVE-2024-37287). Default installs with security enabled ship the documented
+      elastic superuser account on the web login.
+    cve:
+      - CVE-2024-37287
+    match:
+      path: /
+      body_contains: "Kibana"
+    default_credentials:
+      - {username: elastic, password: changeme}
+    auth:
+      type: form
+      path: /internal/security/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "Invalid"
