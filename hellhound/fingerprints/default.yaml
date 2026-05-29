@@ -394,3 +394,151 @@ fingerprints:
     auth:
       type: basic
       path: /
+
+  # --- Phase 2 expansion (third tranche): additional device classes seen in
+  # 2024-2025 mass-exploitation campaigns and Mirai variant target lists.
+  # Default credentials verified from vendor documentation and public advisories.
+  # ---
+
+  - id: tbk-dvr
+    vendor: TBK
+    model_class: DVR
+    severity: critical
+    description: >-
+      TBK DVR-4104 / DVR-4216 (and many OEM rebrands) ship with admin/admin and
+      are actively exploited by Mirai botnets via CVE-2024-3721.
+    cve:
+      - CVE-2024-3721
+    match:
+      path: /
+      body_contains: "/device.rsp"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login.rsp
+      username_field: username
+      password_field: password
+
+  - id: totolink-router
+    vendor: TOTOLINK
+    model_class: SOHO router
+    severity: high
+    description: >-
+      TOTOLINK A-series and N-series routers default to admin/admin and are a
+      recurring Mirai variant target (multiple 2024 command-injection CVEs).
+    cve:
+      - CVE-2024-7029
+    match:
+      path: /
+      http_title: TOTOLINK
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /cgi-bin/cstecgi.cgi
+      username_field: username
+      password_field: password
+
+  - id: uniview-nvr
+    vendor: Uniview
+    model_class: NVR / IP Camera
+    severity: high
+    description: >-
+      Uniview (UNV) NVRs and cameras default to admin/123456 on the web login.
+    match:
+      path: /
+      body_contains: "uniview"
+    default_credentials:
+      - {username: admin, password: "123456"}
+    auth:
+      type: form
+      path: /LAPI/V1.0/Login
+      username_field: userName
+      password_field: password
+
+  - id: hanwha-wisenet
+    vendor: Hanwha
+    model_class: Network camera (Wisenet)
+    severity: high
+    description: >-
+      Hanwha Techwin Wisenet cameras shipped with admin/4321 before forced
+      password change was enforced on first boot.
+    match:
+      path: /
+      http_title: WISENET
+    default_credentials:
+      - {username: admin, password: "4321"}
+    auth:
+      type: basic
+      path: /stw-cgi/system.cgi?msubmenu=deviceinfo&action=view
+
+  - id: qnap-nas
+    vendor: QNAP
+    model_class: Network attached storage
+    severity: high
+    description: >-
+      QNAP NAS appliances default to admin/admin on the QTS web console.
+    match:
+      path: /
+      body_contains: "QNAP"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /cgi-bin/authLogin.cgi
+      username_field: user
+      password_field: pwd
+
+  - id: wd-mycloud
+    vendor: Western Digital
+    model_class: Network attached storage (My Cloud)
+    severity: high
+    description: >-
+      Western Digital My Cloud NAS devices default to admin/admin on the web
+      dashboard.
+    match:
+      path: /
+      body_contains: "wdnas"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /cgi-bin/login_mgr.cgi
+      username_field: username
+      password_field: pw
+
+  - id: hikvision-isapi-camera
+    vendor: Hikvision
+    model_class: IP Camera (ISAPI web)
+    severity: high
+    description: >-
+      Hikvision IP cameras exposing the newer web client that ship with the
+      admin/admin12345 factory default. Supplements the legacy hikvision-dvr
+      entry whose default is admin/12345.
+    match:
+      path: /
+      body_contains: "/doc/page/login.asp"
+    default_credentials:
+      - {username: admin, password: admin12345}
+    auth:
+      type: basic
+      path: /ISAPI/Security/userCheck
+
+  - id: cisco-rv-router
+    vendor: Cisco
+    model_class: Small Business VPN router (RV series)
+    severity: medium
+    description: >-
+      Cisco RV-series small-business routers (RV320 / RV340 family) default to
+      cisco/cisco on the web management UI.
+    match:
+      path: /
+      http_title: "Cisco Small Business"
+    default_credentials:
+      - {username: cisco, password: cisco}
+    auth:
+      type: form
+      path: /login.cgi
+      username_field: username
+      password_field: password
