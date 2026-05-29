@@ -891,3 +891,189 @@ fingerprints:
       path: /__api__/v1/logon
       username_field: username
       password_field: password
+
+  # --- Phase 2 expansion (sixth tranche): internet-facing enterprise servers and
+  # remote-access appliances from the 2023-2025 CISA KEV / mass-exploitation lists
+  # (Cl0p, ransomware affiliates, CitrixBleed campaigns). Recognised from their
+  # web management / login surface, with the documented default web-admin
+  # credentials checked. None of these device classes were covered by tranches
+  # 1-5. Default credentials verified from vendor documentation and public
+  # advisories. ---
+
+  - id: veeam-backup
+    vendor: Veeam
+    model_class: Backup & Replication console
+    severity: critical
+    description: >-
+      Veeam Backup & Replication exposes the Backup Enterprise Manager web
+      console and was mass-exploited in 2024 via a pre-auth RCE in the backup
+      service (CVE-2024-40711). Installations seeded with the documented
+      administrator/admin web account remain exposed.
+    cve:
+      - CVE-2024-40711
+    match:
+      path: /
+      body_contains: "Veeam Backup"
+    default_credentials:
+      - {username: administrator, password: admin}
+    auth:
+      type: form
+      path: /api/sessionMngr/?v=latest
+      username_field: username
+      password_field: password
+
+  - id: citrix-netscaler
+    vendor: Citrix
+    model_class: NetScaler ADC / Gateway
+    severity: critical
+    description: >-
+      Citrix NetScaler ADC / Gateway (NetScaler Gateway / AAA virtual servers)
+      were mass-exploited via the CitrixBleed session-token leaks
+      (CVE-2023-4966 and CVE-2025-5777). The appliance management UI ships with
+      the documented nsroot/nsroot default account.
+    cve:
+      - CVE-2023-4966
+      - CVE-2025-5777
+    match:
+      path: /
+      body_contains: "/vpn/index.html"
+    default_credentials:
+      - {username: nsroot, password: nsroot}
+    auth:
+      type: form
+      path: /nclogin
+      username_field: login
+      password_field: passwd
+
+  - id: progress-wsftp
+    vendor: Progress
+    model_class: WS_FTP Server (managed file transfer)
+    severity: critical
+    description: >-
+      Progress WS_FTP Server exposes an internet-facing transfer/admin web
+      portal and was mass-exploited in 2023 via the Ad Hoc Transfer module
+      (CVE-2023-40044, Cl0p-adjacent campaigns). Default installs ship with the
+      documented admin/admin web account.
+    cve:
+      - CVE-2023-40044
+    match:
+      path: /
+      body_contains: "WS_FTP Server"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /SignIn
+      username_field: username
+      password_field: password
+
+  - id: adobe-coldfusion
+    vendor: Adobe
+    model_class: ColdFusion application server (admin)
+    severity: critical
+    description: >-
+      Adobe ColdFusion servers expose the /CFIDE/administrator console and were
+      mass-exploited in 2023 via an access-control bypass / deserialisation
+      chain (CVE-2023-26360). Default installs ship with an admin account whose
+      documented out-of-the-box password is admin.
+    cve:
+      - CVE-2023-26360
+    match:
+      path: /
+      body_contains: "/CFIDE/administrator"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /CFIDE/administrator/enter.cfm
+      username_field: cfadminUserId
+      password_field: cfadminPassword
+
+  - id: connectwise-screenconnect
+    vendor: ConnectWise
+    model_class: ScreenConnect remote-access server
+    severity: critical
+    description: >-
+      ConnectWise ScreenConnect (self-hosted) exposes a web management console
+      and was mass-exploited in 2024 via an authentication-bypass setup-wizard
+      flaw (CVE-2024-1709). Default installs ship with the documented
+      admin/admin administrator account.
+    cve:
+      - CVE-2024-1709
+    match:
+      path: /
+      body_contains: "ScreenConnect"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /Services/AuthenticationService.ashx/TryLogin
+      username_field: userName
+      password_field: password
+
+  - id: geoserver
+    vendor: GeoServer
+    model_class: GeoServer GIS web application
+    severity: critical
+    description: >-
+      GeoServer is an internet-facing GIS server whose web admin (GeoServer Web
+      Admin) was mass-exploited in 2024 via an OGC-filter evaluation RCE
+      (CVE-2024-36401). It ships with the well-known admin/geoserver default
+      administrator account.
+    cve:
+      - CVE-2024-36401
+    match:
+      path: /
+      body_contains: "GeoServer"
+    default_credentials:
+      - {username: admin, password: geoserver}
+    auth:
+      type: form
+      path: /geoserver/j_spring_security_check
+      username_field: username
+      password_field: password
+
+  - id: roundcube-webmail
+    vendor: Roundcube
+    model_class: Roundcube webmail
+    severity: high
+    description: >-
+      Roundcube webmail is a widely self-hosted internet-facing mail client that
+      was exploited in 2024 via a stored-XSS flaw in attachment handling
+      (CVE-2024-37383). Instances back an IMAP server, so a working mail account
+      (commonly the seeded admin/admin demo account on fresh installs)
+      authenticates through the login form.
+    cve:
+      - CVE-2024-37383
+    match:
+      path: /
+      body_contains: "roundcube"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /?_task=login&_action=login
+      username_field: _user
+      password_field: _pass
+
+  - id: papercut-ng
+    vendor: PaperCut
+    model_class: PaperCut NG / MF print management
+    severity: critical
+    description: >-
+      PaperCut NG / MF print-management servers expose an internet-facing admin
+      web console and were mass-exploited in 2023 (CVE-2023-27350, ransomware
+      affiliates). Default installs ship with the documented admin account whose
+      out-of-the-box password is admin.
+    cve:
+      - CVE-2023-27350
+    match:
+      path: /
+      body_contains: "PaperCut"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /app
+      username_field: usernameField
+      password_field: passwordField
