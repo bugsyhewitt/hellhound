@@ -132,7 +132,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 160 fingerprint(s) loaded
+hellhound: 168 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -496,7 +496,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 160 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 168 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -625,7 +625,15 @@ Operations for Networks / vRealize Network Insight (CVE-2023-34051), Dell
 iDRAC out-of-band server management (CVE-2018-1207), Nagios XI
 (CVE-2023-40931), Rocket.Chat (CVE-2021-22911), Portainer container
 management UI (CVE-2018-19466), and the OpenEMR electronic-health-records
-portal (CVE-2023-2950).
+portal (CVE-2023-2950). A twentieth tranche covers internet-facing artifact
+repositories, issue trackers, workflow orchestrators, file-sync servers,
+source-control servers, forum platforms and industrial PLC web UIs mass-
+exploited across the CISA KEV catalog: Sonatype Nexus Repository Manager
+(CVE-2024-4956), Atlassian Jira Server / Data Center (CVE-2022-0540),
+Apache Airflow (CVE-2022-24288), Nextcloud (CVE-2023-49792), Gitea
+(CVE-2024-6886), vBulletin (CVE-2023-25135), WAGO PFC / 750-series
+programmable logic controllers (CVE-2023-1698), and Schneider Electric
+Modicon M340 / M580 PLCs (CVE-2018-7846).
 
 Each file has a top-level `fingerprints` list. An entry:
 
