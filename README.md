@@ -132,7 +132,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 176 fingerprint(s) loaded
+hellhound: 184 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -496,7 +496,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 176 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 184 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -644,7 +644,16 @@ and management server (CVE-2021-30116, REvil), the PHP CGI handler on
 internet-facing web servers (CVE-2024-4577, TellYouThePass), the Trend
 Micro Mobile Security enterprise management server (CVE-2022-40139),
 and the Veritas Backup Exec agent / web management console
-(CVE-2021-27876, ALPHV).
+(CVE-2021-27876, ALPHV). A twenty-second tranche covers internet-facing
+big-data, streaming, object-storage, message-broker, service-discovery and
+dataflow servers mass-exploited across the CISA KEV catalog: the Spring
+Cloud Gateway API gateway (CVE-2022-22947), the MinIO S3-compatible object
+storage console (CVE-2023-28432), Apache Kafka Connect distributed workers
+(CVE-2023-25194), the Elasticsearch search and analytics engine
+(CVE-2015-1427, Groovy sandbox bypass), Apache Hadoop YARN ResourceManager
+(CVE-2022-26612), the RabbitMQ Management UI (CVE-2023-46118), the
+HashiCorp Consul service discovery web UI (CVE-2020-7955), and the Apache
+NiFi dataflow management web UI (CVE-2023-34468).
 
 Each file has a top-level `fingerprints` list. An entry:
 

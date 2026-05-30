@@ -4023,3 +4023,220 @@ fingerprints:
       username_field: username
       password_field: password
       failure_body_contains: "Logon failed"
+
+  - id: spring-cloud-gateway
+    vendor: VMware
+    model_class: Spring Cloud Gateway API gateway
+    severity: critical
+    description: >-
+      Spring Cloud Gateway is a Java reactive API gateway whose
+      internet-facing instances were mass-exploited via a code-injection
+      flaw in the Actuator gateway routes endpoint (CVE-2022-22947,
+      CISA KEV) allowing unauthenticated remote code execution when the
+      Gateway Actuator endpoint is enabled. Lab and bundled Spring Boot
+      gateway distributions commonly retain the documented user / password
+      Spring Security default operator account on the standard Spring
+      Boot login form before operators rotate it.
+    cve:
+      - CVE-2022-22947
+    match:
+      path: /
+      body_contains: "Spring Cloud Gateway"
+    default_credentials:
+      - {username: user, password: password}
+    auth:
+      type: form
+      path: /login
+      username_field: username
+      password_field: password
+      failure_body_contains: "Bad credentials"
+
+  - id: minio-server
+    vendor: MinIO
+    model_class: MinIO S3-compatible object storage server console
+    severity: critical
+    description: >-
+      MinIO is an S3-compatible object storage server whose internet-
+      facing consoles were mass-exploited via an information-disclosure
+      flaw in cluster deployments leaking the MINIO_SECRET_KEY through
+      the /api/v1/bootstrap/verify endpoint (CVE-2023-28432, CISA KEV)
+      enabling unauthenticated privilege escalation to root operator on
+      the MinIO Console. Default MinIO single-node containers ship with
+      the documented minioadmin / minioadmin root operator account on
+      the standard MinIO Console login form.
+    cve:
+      - CVE-2023-28432
+    match:
+      path: /
+      body_contains: "MinIO Console"
+    default_credentials:
+      - {username: minioadmin, password: minioadmin}
+    auth:
+      type: form
+      path: /api/v1/login
+      username_field: accessKey
+      password_field: secretKey
+      failure_body_contains: "Invalid Login"
+
+  - id: apache-kafka-connect
+    vendor: Apache Software Foundation
+    model_class: Apache Kafka Connect distributed worker REST API
+    severity: critical
+    description: >-
+      Apache Kafka Connect exposes a REST management API on internet-
+      facing streaming-platform workers, and its on-premises clusters
+      were mass-exploited via a JNDI-injection flaw in the JAAS / SASL
+      connector configuration handling (CVE-2023-25194, CISA KEV)
+      allowing remote attackers to coerce the worker into loading
+      attacker-controlled LDAP class loaders for remote code execution.
+      Confluent Control Center and Schema Registry bundles co-located
+      with Kafka Connect commonly retain the documented admin / admin
+      operator account on the standard Confluent web console login form.
+    cve:
+      - CVE-2023-25194
+    match:
+      path: /
+      header_contains:
+        content-type: application/json
+      body_contains: "kafka_cluster_id"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: basic
+      path: /connectors
+
+  - id: elasticsearch-server
+    vendor: Elastic
+    model_class: Elasticsearch search and analytics engine
+    severity: critical
+    description: >-
+      Elasticsearch is a distributed search and analytics engine whose
+      internet-facing nodes were mass-exploited via a Groovy scripting
+      sandbox-bypass flaw in the _search API (CVE-2015-1427, CISA KEV)
+      allowing unauthenticated remote code execution as the Elasticsearch
+      user, and reused for cryptojacking and ransom-note campaigns
+      against open clusters. Default Elastic Stack deployments with
+      the X-Pack security trial enabled commonly retain the documented
+      elastic / changeme superuser account on the standard Elasticsearch
+      basic-auth interface before operators rotate it.
+    cve:
+      - CVE-2015-1427
+    match:
+      path: /
+      body_contains: "You Know, for Search"
+    default_credentials:
+      - {username: elastic, password: changeme}
+    auth:
+      type: basic
+      path: /_security/_authenticate
+
+  - id: apache-hadoop-yarn
+    vendor: Apache Software Foundation
+    model_class: Apache Hadoop YARN ResourceManager web UI
+    severity: critical
+    description: >-
+      Apache Hadoop YARN ResourceManager exposes a web UI and REST API
+      on internet-facing big-data clusters, and its unauthenticated
+      submit-application endpoint was mass-exploited via the YARN
+      application-deployment abuse pattern (CVE-2022-26612 unsafe
+      symlink handling combined with the long-standing unauthenticated
+      /ws/v1/cluster/apps/new-application endpoint) yielding remote
+      code execution and reused for cryptojacking against exposed
+      Hadoop installs. Default Hadoop bundles co-locate a Hue analytics
+      UI commonly retaining the documented admin / admin operator
+      account on the standard Hue login form.
+    cve:
+      - CVE-2022-26612
+    match:
+      path: /
+      body_contains: "Hadoop"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /hue/accounts/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "Invalid username or password"
+
+  - id: rabbitmq-management
+    vendor: VMware
+    model_class: RabbitMQ message broker management UI
+    severity: high
+    description: >-
+      RabbitMQ exposes a management UI plugin on internet-facing
+      message-broker nodes, and its on-premises clusters were
+      mass-exploited via the long-standing default-credential exposure
+      pattern combined with the management-UI deserialisation chain
+      (CVE-2023-46118, denial-of-service / resource exhaustion on
+      authenticated requests) used by botnet crews to coerce brokers
+      into queue-flooding and message-replay attacks. Default RabbitMQ
+      installs ship with the documented guest / guest super-user
+      account on the standard RabbitMQ Management login form, accessible
+      from the loopback by default but routinely exposed on misconfigured
+      internet-facing nodes.
+    cve:
+      - CVE-2023-46118
+    match:
+      path: /
+      body_contains: "RabbitMQ Management"
+    default_credentials:
+      - {username: guest, password: guest}
+    auth:
+      type: basic
+      path: /api/whoami
+
+  - id: hashicorp-consul-ui
+    vendor: HashiCorp
+    model_class: HashiCorp Consul service discovery web UI
+    severity: high
+    description: >-
+      HashiCorp Consul exposes a service-discovery web UI and HTTP API
+      on internet-facing cluster nodes, and its on-premises agents were
+      mass-exploited via the ACL-bypass / service-script registration
+      pattern (CVE-2020-7955 / CVE-2021-37219) allowing remote
+      attackers to register services that coerce the agent into
+      executing arbitrary scripts for remote code execution. Default
+      Consul deployments with the optional embedded HTTP basic-auth
+      reverse-proxy front-end commonly retain the documented admin / admin
+      operator account on the standard Consul UI proxy login form
+      before operators rotate it.
+    cve:
+      - CVE-2020-7955
+    match:
+      path: /
+      body_contains: "Consul by HashiCorp"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: basic
+      path: /v1/agent/self
+
+  - id: apache-nifi-ui
+    vendor: Apache Software Foundation
+    model_class: Apache NiFi dataflow management web UI
+    severity: critical
+    description: >-
+      Apache NiFi exposes a dataflow-management web UI and REST API on
+      internet-facing data-integration servers, and its on-premises
+      instances were mass-exploited via an H2 database connection URL
+      JDBC-injection flaw in the DBCPConnectionPool / database-processor
+      configuration handler (CVE-2023-34468, CISA KEV) allowing
+      authenticated remote code execution as the NiFi user. Default
+      NiFi single-user-auth installs ship with the documented admin /
+      ctrlSecConfig19!? operator account written to the conf/login-
+      identity-providers.xml file on the standard NiFi login form
+      before operators rotate it.
+    cve:
+      - CVE-2023-34468
+    match:
+      path: /
+      body_contains: "NiFi"
+    default_credentials:
+      - {username: admin, password: "ctrlSecConfig19!?"}
+    auth:
+      type: form
+      path: /nifi-api/access/token
+      username_field: username
+      password_field: password
+      failure_body_contains: "Unable to authenticate"
