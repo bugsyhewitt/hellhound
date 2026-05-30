@@ -132,7 +132,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 168 fingerprint(s) loaded
+hellhound: 176 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -496,7 +496,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 168 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 176 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -633,7 +633,18 @@ exploited across the CISA KEV catalog: Sonatype Nexus Repository Manager
 Apache Airflow (CVE-2022-24288), Nextcloud (CVE-2023-49792), Gitea
 (CVE-2024-6886), vBulletin (CVE-2023-25135), WAGO PFC / 750-series
 programmable logic controllers (CVE-2023-1698), and Schneider Electric
-Modicon M340 / M580 PLCs (CVE-2018-7846).
+Modicon M340 / M580 PLCs (CVE-2018-7846). A twenty-first tranche covers
+additional internet-facing enterprise appliances, CMS platforms, RMM and
+backup servers mass-exploited across the CISA KEV catalog: Fortinet
+FortiNAC network access control appliance (CVE-2022-39952), the Drupal
+content management system (CVE-2018-7600, Drupalgeddon2), the Joomla
+administrator portal (CVE-2023-23752), Liferay Portal / Digital
+Experience Platform (CVE-2020-7961), the Kaseya VSA remote-monitoring
+and management server (CVE-2021-30116, REvil), the PHP CGI handler on
+internet-facing web servers (CVE-2024-4577, TellYouThePass), the Trend
+Micro Mobile Security enterprise management server (CVE-2022-40139),
+and the Veritas Backup Exec agent / web management console
+(CVE-2021-27876, ALPHV).
 
 Each file has a top-level `fingerprints` list. An entry:
 

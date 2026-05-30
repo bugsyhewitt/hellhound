@@ -3802,3 +3802,224 @@ fingerprints:
       username_field: username
       password_field: password
       failure_body_contains: "Authentication failed"
+
+  - id: fortinet-fortinac
+    vendor: Fortinet
+    model_class: Fortinet FortiNAC network access control appliance
+    severity: critical
+    description: >-
+      Fortinet FortiNAC network access control appliances expose an
+      internet-facing keyUpload servlet on the management web UI that
+      was mass-exploited via an unauthenticated arbitrary-file-write
+      flaw (CVE-2022-39952, CISA KEV) allowing remote attackers to
+      drop a root cron job and obtain code execution. Default FortiNAC
+      appliances ship with the documented administrator account
+      (admin / blank) on the standard FortiNAC web login form before
+      operators rotate it during onboarding.
+    cve:
+      - CVE-2022-39952
+    match:
+      path: /
+      body_contains: "FortiNAC"
+    default_credentials:
+      - {username: administrator, password: ""}
+    auth:
+      type: form
+      path: /login
+      username_field: username
+      password_field: password
+      failure_body_contains: "incorrect"
+
+  - id: drupal-cms
+    vendor: Drupal Association
+    model_class: Drupal content management system
+    severity: critical
+    description: >-
+      Drupal is one of the most widely deployed open-source content
+      management systems, and its internet-facing installations were
+      mass-exploited via an unauthenticated remote code execution flaw
+      in the form-rendering API (CVE-2018-7600, Drupalgeddon2, CISA
+      KEV) abused for cryptojacking and webshell deployment. Default
+      Drupal first-run installs ship with an admin / admin super-user
+      account on the standard Drupal /user/login form before operators
+      complete onboarding.
+    cve:
+      - CVE-2018-7600
+    match:
+      path: /
+      header_contains:
+        x-generator: Drupal
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /user/login
+      username_field: name
+      password_field: pass
+      failure_body_contains: "Unrecognized username or password"
+
+  - id: joomla-cms
+    vendor: Open Source Matters
+    model_class: Joomla content management system administrator portal
+    severity: critical
+    description: >-
+      Joomla is a widely deployed open-source content management system
+      whose internet-facing instances were mass-exploited via an
+      authentication-bypass flaw in the Web Services API exposing
+      configuration secrets (CVE-2023-23752, CISA KEV) allowing
+      attackers to harvest the super-user credentials and pivot into
+      the administrator portal. Default Joomla first-run installs
+      commonly retain the operator-set admin / admin super-user on the
+      standard /administrator login form before rotation.
+    cve:
+      - CVE-2023-23752
+    match:
+      path: /
+      body_contains: "Joomla"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /administrator/index.php
+      username_field: username
+      password_field: passwd
+      failure_body_contains: "Username and password do not match"
+
+  - id: liferay-portal
+    vendor: Liferay
+    model_class: Liferay Portal / Digital Experience Platform
+    severity: critical
+    description: >-
+      Liferay Portal is a Java-based enterprise portal and digital
+      experience platform whose internet-facing installations were
+      mass-exploited via an unauthenticated Java deserialisation flaw
+      in the JSON web services endpoint (CVE-2020-7961, CISA KEV)
+      yielding remote code execution as the portal user. Default
+      Liferay bundles ship with the documented test@liferay.com / test
+      super-administrator account on the standard Liferay sign-in form
+      before operators rotate it.
+    cve:
+      - CVE-2020-7961
+    match:
+      path: /
+      body_contains: "Liferay"
+    default_credentials:
+      - {username: "test@liferay.com", password: test}
+    auth:
+      type: form
+      path: /c/portal/login
+      username_field: login
+      password_field: password
+      failure_body_contains: "Authentication failed"
+
+  - id: kaseya-vsa
+    vendor: Kaseya
+    model_class: Kaseya VSA remote monitoring and management server
+    severity: critical
+    description: >-
+      Kaseya VSA is a remote monitoring and management platform whose
+      internet-facing on-premises servers were mass-exploited via an
+      authentication-bypass chain in the dl.asp / userFilterTableRpt
+      endpoints (CVE-2021-30116, CISA KEV) used by the REvil
+      ransomware crew to push malicious agent updates to thousands of
+      downstream MSP customers. Lab and freshly deployed Kaseya VSA
+      servers commonly retain the documented kadmin / kaseya operator
+      account on the standard VSA login form.
+    cve:
+      - CVE-2021-30116
+    match:
+      path: /
+      body_contains: "Kaseya"
+    default_credentials:
+      - {username: kadmin, password: kaseya}
+    auth:
+      type: form
+      path: /LoginRpt.asp
+      username_field: vsaUser
+      password_field: vsaPass
+      failure_body_contains: "Logon failed"
+
+  - id: php-cgi-server
+    vendor: PHP Group
+    model_class: PHP CGI handler exposed by an internet-facing web server
+    severity: critical
+    description: >-
+      PHP exposes a CGI SAPI handler that mass-exploited internet-
+      facing Windows web servers reintroduced a 2012 argument-injection
+      flaw via Windows code-page best-fit character conversion
+      (CVE-2024-4577, CISA KEV), allowing unauthenticated remote code
+      execution against PHP-CGI listeners and abused by the
+      TellYouThePass ransomware crew. Lab and bundled XAMPP / WAMP
+      stacks frequently ship with the documented admin / admin operator
+      account on the standard phpMyAdmin login form, the common
+      management UI co-located with vulnerable PHP-CGI listeners.
+    cve:
+      - CVE-2024-4577
+    match:
+      path: /
+      header_contains:
+        x-powered-by: PHP
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /phpmyadmin/index.php
+      username_field: pma_username
+      password_field: pma_password
+      failure_body_contains: "Cannot log in"
+
+  - id: trendmicro-mobile-security
+    vendor: Trend Micro
+    model_class: Trend Micro Mobile Security enterprise management server
+    severity: critical
+    description: >-
+      Trend Micro Mobile Security for Enterprise exposes an internet-
+      facing management server administering MDM-enrolled devices, and
+      its on-premises consoles were mass-exploited via an
+      authentication-bypass / SQL-injection chain in the management
+      web UI (CVE-2022-40139, CISA KEV) allowing remote attackers to
+      push malicious agent rollouts to managed endpoints. Default
+      Trend Micro Mobile Security installs ship with the documented
+      root / mobilesecurity super-administrator account on the
+      standard TMMS web console login form.
+    cve:
+      - CVE-2022-40139
+    match:
+      path: /
+      body_contains: "Mobile Security"
+    default_credentials:
+      - {username: root, password: mobilesecurity}
+    auth:
+      type: form
+      path: /mdm/web/login
+      username_field: account
+      password_field: password
+      failure_body_contains: "incorrect"
+
+  - id: veritas-backup-exec
+    vendor: Veritas
+    model_class: Veritas Backup Exec agent / web management console
+    severity: critical
+    description: >-
+      Veritas Backup Exec exposes an agent and web management console
+      on internet-facing backup servers, and its on-premises deployments
+      were mass-exploited via an authentication chain abusing the
+      SHA-authentication scheme in the Backup Exec Agent protocol
+      (CVE-2021-27876, CISA KEV) allowing remote attackers to read
+      arbitrary files and pivot into ransomware deployment by the
+      ALPHV / BlackCat crew. Default Backup Exec installs commonly
+      retain the documented BEAdmin / backup operator account on the
+      standard Backup Exec web management console login form.
+    cve:
+      - CVE-2021-27876
+    match:
+      path: /
+      body_contains: "Backup Exec"
+    default_credentials:
+      - {username: BEAdmin, password: backup}
+    auth:
+      type: form
+      path: /bemcli/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "Logon failed"
