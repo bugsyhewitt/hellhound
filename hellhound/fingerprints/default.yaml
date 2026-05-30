@@ -3379,3 +3379,216 @@ fingerprints:
       username_field: name
       password_field: password
       failure_body_contains: "invalid"
+
+  # ---- tranche 19 --------------------------------------------------------
+  # Eight further KEV-targeted device classes — CI/CD orchestrators,
+  # observability dashboards, virtualisation brokers, remote-management
+  # processors, monitoring servers, EHR portals, chat platforms and
+  # container management UIs — all of which carry CISA Known Exploited
+  # Vulnerabilities and routinely ship with documented default credentials.
+
+  - id: jenkins-server
+    vendor: Jenkins
+    model_class: Jenkins CI/CD automation server
+    severity: critical
+    description: >-
+      Jenkins is the most widely deployed self-hosted CI/CD orchestrator and
+      its internet-facing controller was mass-exploited via an arbitrary
+      file-read flaw in the CLI command parser (CVE-2024-23897, CISA KEV)
+      used to pivot into source-control credentials and downstream build
+      agents. Default Jenkins installs prompt for an initial admin password
+      but many operator-rebuilt or container-image deployments retain the
+      documented admin / admin pair on the standard Jenkins login form.
+    cve:
+      - CVE-2024-23897
+    match:
+      path: /
+      body_contains: "Jenkins"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /j_spring_security_check
+      username_field: j_username
+      password_field: j_password
+      failure_body_contains: "Invalid"
+
+  - id: grafana-server
+    vendor: Grafana Labs
+    model_class: Grafana observability dashboard server
+    severity: high
+    description: >-
+      Grafana is a widely deployed self-hosted observability dashboard whose
+      internet-facing instances were mass-exploited via a path-traversal flaw
+      in the plugin static-file handler (CVE-2021-43798, CISA KEV) leaking
+      arbitrary files including data-source secrets. Default Grafana installs
+      ship with the documented admin / admin account on the standard Grafana
+      login form, which is the long-standing first-run credential.
+    cve:
+      - CVE-2021-43798
+    match:
+      path: /
+      body_contains: "Grafana"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login
+      username_field: user
+      password_field: password
+      failure_body_contains: "Invalid"
+
+  - id: vmware-aria-operations-networks
+    vendor: VMware
+    model_class: VMware Aria Operations for Networks (vRealize Network Insight)
+    severity: critical
+    description: >-
+      VMware Aria Operations for Networks (formerly vRealize Network Insight)
+      is an enterprise network-observability appliance whose internet-facing
+      web console was mass-exploited via a command-injection flaw in the
+      Apache Thrift RPC handler (CVE-2023-34051, CISA KEV) enabling
+      unauthenticated remote code execution as root. Default appliance
+      installs retain the documented admin / admin web account on the
+      standard Aria Operations for Networks login form.
+    cve:
+      - CVE-2023-34051
+    match:
+      path: /
+      body_contains: "Aria Operations for Networks"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /api/auth/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "invalid"
+
+  - id: dell-idrac
+    vendor: Dell
+    model_class: Dell iDRAC out-of-band server management controller
+    severity: critical
+    description: >-
+      Dell iDRAC is the out-of-band baseboard management controller shipped
+      with PowerEdge servers, exposing a web UI for power, KVM and firmware
+      control. Internet-facing iDRACs were mass-exploited via a stack-based
+      buffer overflow in the IPMI handler (CVE-2018-1207, CISA KEV) allowing
+      remote code execution. Default iDRAC controllers ship with the
+      documented root / calvin factory account on the iDRAC login form.
+    cve:
+      - CVE-2018-1207
+    match:
+      path: /
+      body_contains: "iDRAC"
+    default_credentials:
+      - {username: root, password: calvin}
+    auth:
+      type: form
+      path: /data/login
+      username_field: user
+      password_field: password
+      failure_body_contains: "Authentication failed"
+
+  - id: nagios-xi
+    vendor: Nagios Enterprises
+    model_class: Nagios XI network monitoring server
+    severity: critical
+    description: >-
+      Nagios XI is a widely deployed self-hosted network and infrastructure
+      monitoring platform whose internet-facing web UI was mass-exploited via
+      an SQL injection in the Announcement Banner Settings endpoint
+      (CVE-2023-40931, CISA KEV) allowing authenticated low-privilege users
+      to escalate to admin. Default Nagios XI installs retain the documented
+      nagiosadmin / nagiosadmin super-admin account on the standard Nagios XI
+      login form.
+    cve:
+      - CVE-2023-40931
+    match:
+      path: /
+      body_contains: "Nagios XI"
+    default_credentials:
+      - {username: nagiosadmin, password: nagiosadmin}
+    auth:
+      type: form
+      path: /nagiosxi/login.php
+      username_field: username
+      password_field: password
+      failure_body_contains: "Incorrect"
+
+  - id: rocket-chat
+    vendor: Rocket.Chat
+    model_class: Rocket.Chat self-hosted team-messaging server
+    severity: high
+    description: >-
+      Rocket.Chat is a widely deployed self-hosted team-messaging platform
+      whose internet-facing servers were mass-exploited via an
+      unauthenticated NoSQL injection in the password-reset REST endpoint
+      (CVE-2021-22911, CISA KEV) leaking admin password-reset tokens. Default
+      Rocket.Chat first-run installs commonly retain the documented
+      admin / admin operator account on the standard Rocket.Chat login form
+      before onboarding completes.
+    cve:
+      - CVE-2021-22911
+    match:
+      path: /
+      body_contains: "Rocket.Chat"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /api/v1/login
+      username_field: user
+      password_field: password
+      failure_body_contains: "Unauthorized"
+
+  - id: portainer-server
+    vendor: Portainer
+    model_class: Portainer container / Docker management UI
+    severity: critical
+    description: >-
+      Portainer is a widely deployed self-hosted container-management UI for
+      Docker, Swarm and Kubernetes clusters whose internet-facing instances
+      were mass-exploited via an authentication-bypass flaw in the
+      initial-admin-creation window (CVE-2018-19466) when left exposed
+      without an admin set, and via the persistent risk of operator-set
+      default credentials reaching production. Default Portainer deployments
+      commonly retain the documented admin / portainer account on the
+      standard Portainer login form.
+    cve:
+      - CVE-2018-19466
+    match:
+      path: /
+      body_contains: "Portainer"
+    default_credentials:
+      - {username: admin, password: portainer}
+    auth:
+      type: form
+      path: /api/auth
+      username_field: Username
+      password_field: Password
+      failure_body_contains: "Invalid"
+
+  - id: openemr-server
+    vendor: OpenEMR Foundation
+    model_class: OpenEMR electronic-health-records portal
+    severity: critical
+    description: >-
+      OpenEMR is the most widely deployed open-source electronic-health-
+      records and practice-management platform, with internet-facing clinic
+      deployments mass-exploited via an authenticated SQL injection in the
+      patient-portal search endpoint (CVE-2023-2950, CISA KEV) leading to
+      remote code execution. Default OpenEMR installs retain the documented
+      admin / pass super-admin account on the standard OpenEMR login form.
+    cve:
+      - CVE-2023-2950
+    match:
+      path: /
+      body_contains: "OpenEMR"
+    default_credentials:
+      - {username: admin, password: pass}
+    auth:
+      type: form
+      path: /interface/main/main_screen.php
+      username_field: authUser
+      password_field: clearPass
+      failure_body_contains: "Invalid"
