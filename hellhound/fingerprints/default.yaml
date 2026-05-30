@@ -3379,3 +3379,206 @@ fingerprints:
       username_field: name
       password_field: password
       failure_body_contains: "invalid"
+
+  - id: grafana-dashboard
+    vendor: Grafana Labs
+    model_class: Grafana observability dashboard
+    severity: critical
+    description: >-
+      Grafana is a widely deployed self-hosted observability / dashboarding
+      platform whose internet-facing web UI was mass-exploited via an
+      unauthenticated path-traversal flaw in the plugin asset handler
+      (CVE-2021-43798, CISA KEV) leaking arbitrary files including the
+      Grafana configuration and admin secrets. Default Grafana installs
+      retain the documented admin/admin account on the standard Grafana
+      login form.
+    cve:
+      - CVE-2021-43798
+    match:
+      path: /
+      body_contains: "Grafana"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login
+      username_field: user
+      password_field: password
+      failure_body_contains: "Invalid"
+
+  - id: jenkins-controller
+    vendor: Jenkins Project
+    model_class: Jenkins CI/CD automation controller
+    severity: critical
+    description: >-
+      Jenkins is a ubiquitous self-hosted CI/CD automation controller whose
+      internet-facing web UI was mass-exploited via an arbitrary-file-read
+      flaw in the CLI command parser (CVE-2024-23897, CISA KEV) leaking
+      build secrets, SSH keys and credential stores. Default Jenkins
+      installs that skipped the setup wizard retain the documented
+      admin/admin account on the standard Jenkins login form.
+    cve:
+      - CVE-2024-23897
+    match:
+      path: /
+      body_contains: "Jenkins"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /j_spring_security_check
+      username_field: j_username
+      password_field: j_password
+      failure_body_contains: "Invalid"
+
+  - id: nagios-xi
+    vendor: Nagios Enterprises
+    model_class: Nagios XI network monitoring server
+    severity: high
+    description: >-
+      Nagios XI is a widely deployed commercial network-monitoring platform
+      whose internet-facing web UI was mass-exploited via a SQL injection
+      flaw in the announcement-banner handler (CVE-2024-24401, CISA KEV)
+      yielding admin-token disclosure and full takeover. Default Nagios XI
+      installs retain the documented nagiosadmin/nagiosadmin super-admin
+      account on the standard Nagios XI login form.
+    cve:
+      - CVE-2024-24401
+    match:
+      path: /
+      body_contains: "Nagios XI"
+    default_credentials:
+      - {username: nagiosadmin, password: nagiosadmin}
+    auth:
+      type: form
+      path: /nagiosxi/login.php
+      username_field: username
+      password_field: password
+      failure_body_contains: "Incorrect"
+
+  - id: apache-solr
+    vendor: Apache
+    model_class: Apache Solr search server admin UI
+    severity: high
+    description: >-
+      Apache Solr is a widely deployed open-source enterprise search server
+      whose internet-facing admin UI was mass-exploited via a server-side
+      template-injection flaw in the Velocity response writer
+      (CVE-2019-17558, CISA KEV) yielding unauthenticated remote code
+      execution. Default Solr installs with Basic Auth enabled retain the
+      documented solr/SolrRocks account on the Solr admin authentication
+      endpoint.
+    cve:
+      - CVE-2019-17558
+    match:
+      path: /
+      body_contains: "Solr Admin"
+    default_credentials:
+      - {username: solr, password: SolrRocks}
+    auth:
+      type: basic
+      path: /solr/admin/authentication
+
+  - id: jboss-eap
+    vendor: Red Hat
+    model_class: JBoss EAP / WildFly management console
+    severity: critical
+    description: >-
+      JBoss Enterprise Application Platform / WildFly is a widely deployed
+      Java application server whose internet-facing management console was
+      mass-exploited via an unauthenticated Java deserialization flaw in the
+      JMXInvokerServlet (CVE-2017-12149, CISA KEV) yielding remote code
+      execution as the application-server user. Default JBoss EAP installs
+      retain the documented admin/admin management account on the standard
+      JBoss management console login form.
+    cve:
+      - CVE-2017-12149
+    match:
+      path: /
+      body_contains: "WildFly"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /console/login.html
+      username_field: username
+      password_field: password
+      failure_body_contains: "Invalid"
+
+  - id: drupal-cms
+    vendor: Drupal Project
+    model_class: Drupal CMS administrative portal
+    severity: critical
+    description: >-
+      Drupal is a widely deployed open-source content-management platform
+      whose internet-facing admin portal was mass-exploited via an
+      unauthenticated remote-code-execution flaw in the form API
+      (CVE-2018-7600, "Drupalgeddon2", CISA KEV) reachable by any anonymous
+      visitor. Default Drupal installs retain the documented admin/admin
+      site-administrator account on the standard Drupal user login form.
+    cve:
+      - CVE-2018-7600
+    match:
+      path: /
+      header_contains:
+        x-generator: Drupal
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /user/login
+      username_field: name
+      password_field: pass
+      failure_body_contains: "Unrecognized"
+
+  - id: liferay-portal
+    vendor: Liferay
+    model_class: Liferay Portal / Digital Experience Platform
+    severity: critical
+    description: >-
+      Liferay Portal / Digital Experience Platform is a widely deployed Java
+      enterprise portal server whose internet-facing admin UI was
+      mass-exploited via an unauthenticated Java deserialization flaw in the
+      JSON web-services endpoint (CVE-2020-7961, CISA KEV) yielding remote
+      code execution as the portal user. Default Liferay installs retain the
+      documented test@liferay.com/test super-admin account on the standard
+      Liferay portal login form.
+    cve:
+      - CVE-2020-7961
+    match:
+      path: /
+      body_contains: "Liferay"
+    default_credentials:
+      - {username: "test@liferay.com", password: test}
+    auth:
+      type: form
+      path: /c/portal/login
+      username_field: login
+      password_field: password
+      failure_body_contains: "Authentication failed"
+
+  - id: sugarcrm-server
+    vendor: SugarCRM
+    model_class: SugarCRM customer-relationship-management server
+    severity: critical
+    description: >-
+      SugarCRM is a widely deployed self-hosted customer-relationship-
+      management platform whose internet-facing admin UI was mass-exploited
+      via an unauthenticated PHP object-injection flaw in the email-template
+      preview endpoint (CVE-2023-22952, CISA KEV) yielding remote code
+      execution as the web-server user. Default SugarCRM installs retain
+      the documented admin/password administrator account on the standard
+      SugarCRM login form.
+    cve:
+      - CVE-2023-22952
+    match:
+      path: /
+      body_contains: "SugarCRM"
+    default_credentials:
+      - {username: admin, password: password}
+    auth:
+      type: form
+      path: /index.php?module=Users&action=Authenticate
+      username_field: user_name
+      password_field: username_password
+      failure_body_contains: "Invalid"

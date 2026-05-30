@@ -132,7 +132,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 152 fingerprint(s) loaded
+hellhound: 160 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
@@ -496,7 +496,7 @@ fetches and default-credential checks alike, including retries.
 ## Fingerprint format
 
 Fingerprints live in `hellhound/fingerprints/<set>.yaml`. The default set ships
-with 152 device classes. The original Mirai-era set covers Hikvision, Dahua,
+with 160 device classes. The original Mirai-era set covers Hikvision, Dahua,
 MikroTik RouterOS, Ubiquiti, Axis, D-Link, NETGEAR, TP-Link, Foscam, ZyXEL,
 AVTECH, and a generic CCTV admin panel. A second tranche covers device classes
 actively targeted by 2025-2026 botnets: Reolink and Vivotek cameras, second-gen
@@ -616,7 +616,15 @@ Fortra GoAnywhere MFT (CVE-2024-0204), Splunk Enterprise (CVE-2024-36991),
 Apache Superset (CVE-2023-27524), Atlassian Bitbucket Server / Data Center
 (CVE-2022-43781), Lexmark network printers (CVE-2023-26068), the GLPI IT
 asset / service-management portal (CVE-2022-35914), and Apache HugeGraph
-graph-database server (CVE-2024-27348).
+graph-database server (CVE-2024-27348). A nineteenth tranche covers
+internet-facing observability dashboards, CI/CD automation controllers,
+NMS platforms, search-server admin UIs, Java application-server management
+consoles, CMS administrative portals, enterprise portal servers, and CRM
+admin consoles mass-exploited across the CISA KEV catalog: Grafana
+(CVE-2021-43798), Jenkins (CVE-2024-23897), Nagios XI (CVE-2024-24401),
+Apache Solr (CVE-2019-17558), JBoss EAP / WildFly (CVE-2017-12149), Drupal
+(CVE-2018-7600, Drupalgeddon2), Liferay Portal (CVE-2020-7961), and
+SugarCRM (CVE-2023-22952).
 
 Each file has a top-level `fingerprints` list. An entry:
 
