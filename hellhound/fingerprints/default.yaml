@@ -3592,3 +3592,213 @@ fingerprints:
       username_field: authUser
       password_field: clearPass
       failure_body_contains: "Invalid"
+
+  - id: sonatype-nexus-repository
+    vendor: Sonatype
+    model_class: Sonatype Nexus Repository Manager
+    severity: critical
+    description: >-
+      Sonatype Nexus Repository Manager is the most widely deployed self-
+      hosted artifact repository for Java, npm, Docker and other build
+      ecosystems, and its internet-facing instances were mass-exploited via
+      a path-traversal flaw in the static-content handler
+      (CVE-2024-4956, CISA KEV) leaking arbitrary files including the
+      bundled credential store. Default Nexus Repository installs ship with
+      the documented admin / admin123 super-admin account on the standard
+      Nexus login form before the first-run wizard rotates it.
+    cve:
+      - CVE-2024-4956
+    match:
+      path: /
+      body_contains: "Nexus Repository Manager"
+    default_credentials:
+      - {username: admin, password: admin123}
+    auth:
+      type: form
+      path: /service/rapture/session
+      username_field: username
+      password_field: password
+      failure_body_contains: "Incorrect"
+
+  - id: atlassian-jira
+    vendor: Atlassian
+    model_class: Atlassian Jira Server / Data Center
+    severity: critical
+    description: >-
+      Atlassian Jira Server and Data Center is the most widely deployed
+      self-hosted issue-tracking and project-management platform, and its
+      internet-facing instances were mass-exploited via an authentication
+      bypass in the Seraph authentication framework affecting WebWork
+      actions (CVE-2022-0540, CISA KEV) allowing unauthenticated access to
+      privileged endpoints. Default Jira installs commonly retain the
+      documented admin / admin super-admin account on the standard Jira
+      login form before onboarding completes.
+    cve:
+      - CVE-2022-0540
+    match:
+      path: /
+      body_contains: "JIRA"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login.jsp
+      username_field: os_username
+      password_field: os_password
+      failure_body_contains: "Sorry"
+
+  - id: apache-airflow
+    vendor: Apache Software Foundation
+    model_class: Apache Airflow workflow orchestration webserver
+    severity: high
+    description: >-
+      Apache Airflow is a widely deployed self-hosted workflow / DAG
+      orchestration platform whose internet-facing webservers were
+      mass-exploited via an example-DAG remote code execution flaw
+      (CVE-2022-24288, CISA KEV) abused to pivot into connected cloud
+      credentials. Default Airflow installs ship with the documented
+      airflow / airflow super-admin account on the standard FAB
+      Airflow login form before operators rotate it.
+    cve:
+      - CVE-2022-24288
+    match:
+      path: /
+      body_contains: "Airflow"
+    default_credentials:
+      - {username: airflow, password: airflow}
+    auth:
+      type: form
+      path: /login/
+      username_field: username
+      password_field: password
+      failure_body_contains: "Invalid login"
+
+  - id: nextcloud-server
+    vendor: Nextcloud
+    model_class: Nextcloud self-hosted file-sync / collaboration server
+    severity: high
+    description: >-
+      Nextcloud is one of the most widely deployed self-hosted file-sync,
+      file-share and collaboration platforms, and its internet-facing
+      servers were mass-exploited via a server-side request forgery in the
+      file-drop / public-share endpoint (CVE-2023-49792) leveraged to
+      pivot into internal networks. Default Nextcloud first-run installs
+      commonly retain the operator-set admin / admin account on the
+      standard Nextcloud login form before onboarding completes.
+    cve:
+      - CVE-2023-49792
+    match:
+      path: /
+      body_contains: "Nextcloud"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login
+      username_field: user
+      password_field: password
+      failure_body_contains: "Wrong"
+
+  - id: gitea-server
+    vendor: Gitea
+    model_class: Gitea self-hosted Git service
+    severity: high
+    description: >-
+      Gitea is a widely deployed self-hosted Git service whose internet-
+      facing instances were mass-exploited via a stored cross-site
+      scripting flaw in the repository diff renderer
+      (CVE-2024-6886) chained with the admin session cookie to pivot into
+      hosted source-code credentials. Default Gitea installs commonly
+      retain the documented gitea / gitea super-admin account configured
+      by the first-run installer on the standard Gitea login form.
+    cve:
+      - CVE-2024-6886
+    match:
+      path: /
+      body_contains: "Gitea"
+    default_credentials:
+      - {username: gitea, password: gitea}
+    auth:
+      type: form
+      path: /user/login
+      username_field: user_name
+      password_field: password
+      failure_body_contains: "Username or password is incorrect"
+
+  - id: vbulletin-forum
+    vendor: vBulletin
+    model_class: vBulletin self-hosted forum software
+    severity: critical
+    description: >-
+      vBulletin is one of the most widely deployed self-hosted forum
+      platforms, and its internet-facing AdminCP was mass-exploited via
+      a PHP template-injection flaw in the replaceAdTemplate handler
+      (CVE-2023-25135, CISA KEV) allowing unauthenticated remote code
+      execution. Default vBulletin installs ship with the documented
+      admin / password super-admin account on the standard vBulletin
+      AdminCP login form before operators rotate it.
+    cve:
+      - CVE-2023-25135
+    match:
+      path: /
+      body_contains: "vBulletin"
+    default_credentials:
+      - {username: admin, password: password}
+    auth:
+      type: form
+      path: /admincp/login.php
+      username_field: vb_login_username
+      password_field: vb_login_password
+      failure_body_contains: "incorrect"
+
+  - id: wago-plc-controller
+    vendor: WAGO
+    model_class: WAGO PFC / 750-series programmable logic controller web UI
+    severity: critical
+    description: >-
+      WAGO PFC and 750-series programmable logic controllers expose a web
+      configuration interface (WBM) used to manage Modbus / EtherCAT
+      industrial control networks, and internet-facing units were
+      mass-exploited via a missing-authentication flaw in the WBM
+      configuration endpoints (CVE-2023-1698, CISA KEV) allowing
+      unauthenticated attackers to alter controller settings. Default
+      WAGO controllers ship with the documented admin / wago factory
+      account on the standard WAGO WBM login form.
+    cve:
+      - CVE-2023-1698
+    match:
+      path: /
+      body_contains: "WAGO"
+    default_credentials:
+      - {username: admin, password: wago}
+    auth:
+      type: basic
+      path: /wbm
+
+  - id: schneider-modicon-plc
+    vendor: Schneider Electric
+    model_class: Schneider Electric Modicon M340 / M580 PLC web server
+    severity: critical
+    description: >-
+      Schneider Electric Modicon M340 and M580 programmable logic
+      controllers expose an embedded web server used to monitor and
+      manage industrial process automation, and internet-facing units
+      were mass-exploited via an authentication weakness in the
+      controller's UMAS protocol and embedded web stack
+      (CVE-2018-7846, CISA KEV) allowing unauthenticated configuration
+      changes. Default Modicon controllers ship with the documented
+      USER / USER factory web account on the standard Modicon login
+      form.
+    cve:
+      - CVE-2018-7846
+    match:
+      path: /
+      body_contains: "Schneider Electric"
+    default_credentials:
+      - {username: USER, password: USER}
+    auth:
+      type: form
+      path: /secure/system/login_handler.htm
+      username_field: username
+      password_field: password
+      failure_body_contains: "Authentication failed"
