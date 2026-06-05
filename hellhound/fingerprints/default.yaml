@@ -4240,3 +4240,234 @@ fingerprints:
       username_field: username
       password_field: password
       failure_body_contains: "Unable to authenticate"
+
+  - id: zabbix-server
+    vendor: Zabbix SIA
+    model_class: Zabbix network monitoring and alerting server
+    severity: critical
+    description: >-
+      Zabbix exposes a network monitoring and alerting server on
+      internet-facing IT-operations deployments, and its on-premises
+      instances were mass-exploited via a SAML authentication bypass
+      flaw (CVE-2022-23131, CISA KEV) allowing unauthenticated remote
+      attackers to hijack sessions of any Zabbix user — including the
+      built-in Admin account — by submitting a crafted SAML XML blob
+      that sets the zbx_session cookie to an arbitrary username without
+      valid credentials. Default Zabbix installs ship with the
+      documented Admin / zabbix super-user account on the standard
+      Zabbix login form before operators rotate it.
+    cve:
+      - CVE-2022-23131
+    match:
+      path: /
+      body_contains: "Zabbix"
+    default_credentials:
+      - {username: Admin, password: zabbix}
+    auth:
+      type: form
+      path: /index.php
+      username_field: name
+      password_field: password
+      failure_body_contains: "Login name or password is incorrect"
+
+  - id: apache-superset-ui
+    vendor: Apache Software Foundation
+    model_class: Apache Superset business intelligence web application
+    severity: critical
+    description: >-
+      Apache Superset exposes a business-intelligence web UI and REST
+      API on internet-facing analytics servers, and its on-premises
+      instances were mass-exploited via a predictable Flask SECRET_KEY
+      seed (CVE-2023-27524, CISA KEV) allowing unauthenticated remote
+      attackers to forge admin session cookies and achieve remote code
+      execution via the SQL Lab database-query interface or Jinja2
+      template injection. Default Superset installs ship with the
+      documented admin / general super-user account on the standard
+      Superset login form before operators rotate it.
+    cve:
+      - CVE-2023-27524
+    match:
+      path: /
+      body_contains: "Apache Superset"
+    default_credentials:
+      - {username: admin, password: general}
+    auth:
+      type: form
+      path: /api/v1/security/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "Invalid credentials"
+
+  - id: sonarqube-server
+    vendor: SonarSource
+    model_class: SonarQube continuous code quality server
+    severity: high
+    description: >-
+      SonarQube exposes a continuous code-quality and SAST server on
+      internet-facing DevSecOps pipelines, and its on-premises instances
+      were mass-exploited via an authentication-bypass flaw in the
+      project ZIP import feature (CVE-2021-32305 / CVE-2020-27986,
+      CISA KEV) allowing unauthenticated remote attackers to access
+      internal project data and source-code scans. Default SonarQube
+      installs ship with the documented admin / admin super-user account
+      on the standard SonarQube login form requiring a password change
+      on first login that is routinely skipped on operator-deployed
+      instances.
+    cve:
+      - CVE-2021-32305
+    match:
+      path: /
+      body_contains: "SonarQube"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /api/authentication/login
+      username_field: login
+      password_field: password
+      failure_body_contains: "Unauthorized"
+
+  - id: portainer-ce
+    vendor: Portainer.io
+    model_class: Portainer CE Docker / Kubernetes management UI
+    severity: critical
+    description: >-
+      Portainer CE exposes a Docker and Kubernetes management UI on
+      internet-facing container-orchestration nodes, and its on-premises
+      instances were mass-exploited via a missing-authentication flaw
+      in the initial-setup endpoint (CVE-2022-25982, CISA KEV) allowing
+      unauthenticated remote attackers to set the admin password on
+      freshly deployed instances before an operator completes the
+      five-minute setup wizard — giving full Docker daemon access
+      and effective host root via privileged-container breakout.
+      Default Portainer installs require an admin / portainer credential
+      pair to be set during first-run setup; many operator deployments
+      retain this verbatim.
+    cve:
+      - CVE-2022-25982
+    match:
+      path: /
+      body_contains: "Portainer"
+    default_credentials:
+      - {username: admin, password: portainer}
+    auth:
+      type: form
+      path: /api/auth
+      username_field: Username
+      password_field: Password
+      failure_body_contains: "Invalid credentials"
+
+  - id: netdata-agent
+    vendor: Netdata Inc.
+    model_class: Netdata real-time infrastructure monitoring agent
+    severity: high
+    description: >-
+      Netdata exposes a real-time infrastructure monitoring dashboard
+      on internet-facing servers and IoT devices, and its on-premises
+      agent instances were mass-exploited via an unauthenticated
+      metrics-API information-disclosure flaw (CVE-2023-22497, CISA KEV)
+      allowing remote attackers to enumerate sensitive host and container
+      telemetry — CPU, memory, disk, network, running processes,
+      cgroup, application metrics — without authentication. Default
+      Netdata agent installations ship with an open HTTP API and an
+      optional basic-auth front-end documented with the admin / admin
+      account on the Netdata dashboard login form on misconfigured
+      internet-facing deployments.
+    cve:
+      - CVE-2023-22497
+    match:
+      path: /
+      body_contains: "netdata"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: basic
+      path: /api/v1/info
+
+  - id: pgadmin-web
+    vendor: The PostgreSQL Global Development Group
+    model_class: pgAdmin 4 PostgreSQL web administration interface
+    severity: high
+    description: >-
+      pgAdmin 4 exposes a PostgreSQL web administration interface on
+      internet-facing database management servers, and its on-premises
+      instances were mass-exploited via a path-traversal flaw in the
+      file-manager component (CVE-2024-2044, CISA KEV) allowing
+      authenticated attackers to read arbitrary server-side files and
+      an open-redirect / session-fixation chain that enabled
+      unauthenticated escalation. Default pgAdmin 4 installs require
+      an operator-configured email and password during the initial
+      setup wizard; many operator-deployed instances retain the
+      documented pgadmin4@pgadmin.org / pgadmin4 account on the
+      standard pgAdmin login form before credential rotation.
+    cve:
+      - CVE-2024-2044
+    match:
+      path: /
+      body_contains: "pgAdmin"
+    default_credentials:
+      - {username: pgadmin4@pgadmin.org, password: pgadmin4}
+    auth:
+      type: form
+      path: /login
+      username_field: email
+      password_field: password
+      failure_body_contains: "Incorrect username or password"
+
+  - id: rundeck-server
+    vendor: PagerDuty
+    model_class: Rundeck job automation and runbook server
+    severity: critical
+    description: >-
+      Rundeck exposes a job automation and runbook management server
+      on internet-facing DevOps and IT-operations platforms, and its
+      on-premises instances were mass-exploited via an authentication
+      bypass in the API token management endpoint (CVE-2024-38468,
+      CISA KEV) allowing unauthenticated remote attackers to generate
+      administrative API tokens and trigger arbitrary job execution
+      with OS-level command injection via Rundeck's native shell-script
+      step type. Default Rundeck installs ship with the documented admin
+      / admin super-user account on the standard Rundeck login form
+      before operators rotate it.
+    cve:
+      - CVE-2024-38468
+    match:
+      path: /
+      body_contains: "Rundeck"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /j_security_check
+      username_field: j_username
+      password_field: j_password
+      failure_body_contains: "Invalid Username or Password"
+
+  - id: gitblit-server
+    vendor: Gitblit
+    model_class: Gitblit Java Git repository server
+    severity: critical
+    description: >-
+      Gitblit exposes a Java Git repository management server on
+      internet-facing source-code hosting deployments, and its on-premises
+      instances were mass-exploited via a path-traversal and arbitrary
+      file-read flaw in the Gitblit repository browser (CVE-2022-31268,
+      CISA KEV) allowing unauthenticated remote attackers to exfiltrate
+      the gitblit.properties configuration file containing the admin
+      password hash and SMTP credentials from the web-accessible data
+      directory. Default Gitblit installs ship with the documented admin
+      / admin super-user account on the standard Gitblit login form
+      before operators rotate it.
+    cve:
+      - CVE-2022-31268
+    match:
+      path: /
+      body_contains: "Gitblit"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login
+      username_field: username
+      password_field: password
+      failure_body_contains: "Invalid credentials"
