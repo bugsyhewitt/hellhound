@@ -4471,3 +4471,225 @@ fingerprints:
       username_field: username
       password_field: password
       failure_body_contains: "Invalid credentials"
+
+  - id: icinga2-web
+    vendor: Icinga GmbH
+    model_class: Icinga2 network monitoring web interface
+    severity: critical
+    description: >-
+      Icinga Web 2 exposes a network monitoring and alerting web interface on
+      internet-facing infrastructure monitoring deployments, and its instances
+      were mass-exploited via a path traversal vulnerability (CVE-2022-24716,
+      CISA KEV) allowing unauthenticated remote attackers to read sensitive
+      files including the Icinga Web 2 configuration file containing plaintext
+      database credentials and API tokens. Default Icinga Web 2 installs ship
+      with the documented icingaadmin / icinga super-user account on the
+      standard Icinga Web 2 login form before operators rotate it.
+    cve:
+      - CVE-2022-24716
+    match:
+      path: /
+      body_contains: "Icinga Web"
+    default_credentials:
+      - {username: icingaadmin, password: icinga}
+    auth:
+      type: form
+      path: /icingaweb2/authentication/login
+      username_field: username
+      password_field: password
+      failure_body_contains: "Incorrect username or password"
+
+  - id: graylog-server
+    vendor: Graylog Inc.
+    model_class: Graylog centralized log management server
+    severity: critical
+    description: >-
+      Graylog exposes a centralized log management and SIEM web interface on
+      internet-facing security-operations and compliance deployments, and its
+      instances were mass-exploited via a server-side request forgery
+      vulnerability (CVE-2023-41040, CISA KEV) allowing unauthenticated
+      remote attackers to reach internal services and exfiltrate credentials
+      via the Graylog HTTP inputs and content pack import endpoints. Default
+      Graylog installs ship with the documented admin / admin super-user
+      account on the standard Graylog login form before operators rotate it.
+    cve:
+      - CVE-2023-41040
+    match:
+      path: /
+      body_contains: "Graylog"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /api/system/sessions
+      username_field: username
+      password_field: password
+      failure_body_contains: "Invalid credentials"
+
+  - id: checkmk-server
+    vendor: tribe29 GmbH
+    model_class: Checkmk IT infrastructure monitoring server
+    severity: critical
+    description: >-
+      Checkmk exposes an IT infrastructure monitoring and alerting web
+      interface on internet-facing network operations center deployments,
+      and its instances were exploited via an authenticated remote code
+      execution flaw in the Checkmk agent-updater upload endpoint
+      (CVE-2022-46836) allowing an operator-level account to achieve
+      OS-level command execution through a crafted agent package. Default
+      Checkmk installs ship with the documented cmkadmin / cmkadmin
+      super-user account on the standard Checkmk Check_MK login form
+      before operators rotate it.
+    cve:
+      - CVE-2022-46836
+    match:
+      path: /
+      body_contains: "Checkmk"
+    default_credentials:
+      - {username: cmkadmin, password: cmkadmin}
+    auth:
+      type: form
+      path: /check_mk/login.py
+      username_field: _username
+      password_field: _password
+      failure_body_contains: "Invalid credentials"
+
+  - id: pandora-fms
+    vendor: PandoraFMS
+    model_class: Pandora FMS network and server monitoring server
+    severity: critical
+    description: >-
+      Pandora FMS exposes a network, server, and application monitoring web
+      interface on internet-facing infrastructure management deployments, and
+      its instances were mass-exploited via an authenticated OS command
+      injection vulnerability (CVE-2024-11320, CISA KEV) allowing an
+      operator-level account to achieve arbitrary OS command execution through
+      the Pandora FMS event-response management endpoint. Default Pandora FMS
+      installs ship with the documented admin / pandora super-user account on
+      the standard Pandora login form before operators rotate it.
+    cve:
+      - CVE-2024-11320
+    match:
+      path: /
+      body_contains: "Pandora FMS"
+    default_credentials:
+      - {username: admin, password: pandora}
+    auth:
+      type: form
+      path: /pandora_console/index.php
+      username_field: nick
+      password_field: pass
+      failure_body_contains: "Login error"
+
+  - id: librenms-server
+    vendor: LibreNMS
+    model_class: LibreNMS network monitoring and management server
+    severity: critical
+    description: >-
+      LibreNMS exposes a network discovery, monitoring, and alerting web
+      interface on internet-facing NOC and network-engineering deployments,
+      and its instances were exploited via an authenticated remote code
+      execution flaw in the LibreNMS polling settings endpoint
+      (CVE-2022-0273) allowing an operator-level account to achieve OS-level
+      command execution through a crafted poller configuration payload.
+      Default LibreNMS installs ship with the documented admin / admin
+      super-user account on the standard LibreNMS login form before operators
+      rotate it.
+    cve:
+      - CVE-2022-0273
+    match:
+      path: /
+      body_contains: "LibreNMS"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /login
+      username_field: username
+      password_field: password
+      failure_body_contains: "These credentials do not match"
+
+  - id: opennms-horizon
+    vendor: OpenNMS Group
+    model_class: OpenNMS Horizon network management platform
+    severity: critical
+    description: >-
+      OpenNMS Horizon exposes a network management, event correlation, and
+      capacity-planning web interface on internet-facing enterprise network
+      operations deployments, and its instances were exploited via an
+      authenticated Groovy script injection vulnerability (CVE-2023-0872)
+      allowing an administrator account to achieve OS-level command execution
+      through the OpenNMS performance data collection scripting interface.
+      Default OpenNMS Horizon installs ship with the documented admin / admin
+      super-user account on the standard OpenNMS login form before operators
+      rotate it.
+    cve:
+      - CVE-2023-0872
+    match:
+      path: /
+      body_contains: "OpenNMS"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /opennms/j_spring_security_check
+      username_field: j_username
+      password_field: j_password
+      failure_body_contains: "Your login attempt was not successful"
+
+  - id: otrs-helpdesk
+    vendor: OTRS AG
+    model_class: OTRS open-source IT service management help-desk
+    severity: critical
+    description: >-
+      OTRS exposes an IT service management, ticket, and help-desk web
+      interface on internet-facing IT operations and customer-support
+      deployments, and its instances were mass-exploited via a privilege
+      escalation flaw in the OTRS customer user account management endpoint
+      (CVE-2021-36100, CISA KEV) allowing a customer-portal account to
+      achieve agent-level or administrator-level access through a crafted
+      account-switching request. Default OTRS installs ship with the
+      documented root@localhost / root super-user account on the standard
+      OTRS agent login form before operators rotate it.
+    cve:
+      - CVE-2021-36100
+    match:
+      path: /
+      body_contains: "OTRS"
+    default_credentials:
+      - {username: "root@localhost", password: root}
+    auth:
+      type: form
+      path: /otrs/index.pl
+      username_field: User
+      password_field: Password
+      failure_body_contains: "Login failed"
+
+  - id: manageengine-opmanager
+    vendor: Zoho Corporation
+    model_class: ManageEngine OpManager network performance monitoring server
+    severity: critical
+    description: >-
+      ManageEngine OpManager exposes a network performance monitoring and
+      fault management web interface on internet-facing enterprise network
+      operations deployments, and its instances were mass-exploited via a
+      directory traversal vulnerability in the OpManager backup restore
+      endpoint (CVE-2023-47211, CISA KEV) allowing unauthenticated remote
+      attackers to read and write arbitrary files from the OpManager server
+      filesystem, enabling configuration exfiltration and remote code
+      execution. Default ManageEngine OpManager installs ship with the
+      documented admin / admin super-user account on the standard OpManager
+      login form before operators rotate it.
+    cve:
+      - CVE-2023-47211
+    match:
+      path: /
+      body_contains: "OpManager"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /apiclient/ember/index.jsp
+      username_field: username
+      password_field: password
+      failure_body_contains: "Invalid username or password"
