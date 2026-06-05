@@ -132,7 +132,7 @@ hellhound --list-fingerprints --format text
 ```
 
 ```
-hellhound: 184 fingerprint(s) loaded
+hellhound: 192 fingerprint(s) loaded
 [CRITICAL] hikvision-dvr: Hikvision (DVR / NVR / IP Camera) auth=basic
   default creds: admin:12345
 [CRITICAL] dahua-dvr: Dahua (DVR / NVR / IP Camera) auth=form
