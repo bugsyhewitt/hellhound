@@ -737,6 +737,9 @@ Deliberately **out of scope** for v0.1: Telnet/SSH scanning, brute-forcing
 non-default credentials, any active exploitation, Shodan integration, and a web
 UI. hellhound stays detection-only.
 
+The full v0.1 acceptance bar — six testable criteria, each pinned to a
+specific test file — lives in [`V01_CRITERIA.md`](./V01_CRITERIA.md).
+
 ---
 
 ## Development
