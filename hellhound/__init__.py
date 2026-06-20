@@ -6,4 +6,4 @@ credentials. Detection-only: hellhound reports default-credential exposure,
 it does not exploit it.
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
