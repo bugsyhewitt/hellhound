@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hellhound"
-version = "0.1.0"
+version = "1.0.0"
 description = "Linux-native IoT default-credential scanner with a maintained device-fingerprint database"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -40,4 +40,5 @@ hellhound = ["fingerprints/*.yaml"]
 testpaths = ["tests"]
 markers = [
     "integration: live integration tests requiring Docker (deselect with '-m \"not integration\"')",
+    "ship_gate: v1.0 release ship-gate marker (wheel-build + version-source-of-truth + CHANGELOG existence)",
 ]
