@@ -124,11 +124,12 @@ def test_wheel_version_importable_in_fresh_venv(fresh_venv_dir):
 
 @pytest.mark.ship_gate
 def test_fresh_venv_list_fingerprints_smoke(fresh_venv_dir):
-    """`hellhound --list-fingerprints --format json` in fresh venv MUST report 200 KEV entries.
+    """`hellhound --list-fingerprints --format json` in fresh venv MUST report at least 200 KEV entries.
 
     Read-only smoke (no network, no DB write) — proves the installed wheel
     can load the fingerprint database shipped in `hellhound/fingerprints/default.yaml`
-    (200 entries as of PR #36 MERGED 2026-06-05T15:03:56Z; verified G-018).
+    (200 entries as of PR #36; floor pinned so the assertion never needs updating
+    as new tranches are added).
     """
     bin_dir = fresh_venv_dir / "bin"
     result = subprocess.run(
@@ -140,9 +141,9 @@ def test_fresh_venv_list_fingerprints_smoke(fresh_venv_dir):
     import json
     payload = json.loads(result.stdout)
     # JSON shape: {"summary": {"fingerprint_count": N}, "fingerprints": [...]}
-    count = payload.get("fingerprint_count") or payload.get("summary", {}).get("fingerprint_count")
-    assert count == 200, (
-        f"expected fingerprint_count=200, got: {count!r}; top-level keys: {list(payload.keys())}"
+    count = payload["summary"]["fingerprint_count"]
+    assert count >= 200, (
+        f"expected fingerprint_count >= 200, got: {count!r}"
     )
 
 

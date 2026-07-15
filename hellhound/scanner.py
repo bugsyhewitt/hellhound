@@ -25,6 +25,7 @@ import httpx
 from .fingerprint import AuthCheck, Credential, Fingerprint
 
 _TITLE_RE = re.compile(r"<title[^>]*>(.*?)</title>", re.IGNORECASE | re.DOTALL)
+_TLS_PORTS = frozenset({443, 8443})
 
 
 def extract_title(body: str) -> str:
@@ -281,7 +282,7 @@ class Scanner:
     ) -> list[Finding]:
         findings: list[Finding] = []
         for port in ports:
-            scheme = "https" if port in (443, 8443) else "http"
+            scheme = "https" if port in _TLS_PORTS else "http"
             base = f"{scheme}://{host}:{port}"
             async with self._semaphore:
                 response = await self._safe_get(client, f"{base}/")

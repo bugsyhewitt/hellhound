@@ -21,57 +21,17 @@ fingerprint set so they double as a regression check on the YAML schema for the
 new entries. Mirrors the conventions in ``test_fingerprints_phase2_tranche20.py``.
 """
 
-import asyncio
-import base64
-
 import httpx
 
-from hellhound.fingerprint import Credential, load_fingerprint_set
-from hellhound.scanner import Scanner
-
-
-def run(coro):
-    return asyncio.run(coro)
-
-
-BUNDLED = load_fingerprint_set("default")
-
-
-def fp(fingerprint_id: str):
-    return next(f for f in BUNDLED if f.id == fingerprint_id)
-
-
-def scan_one(fingerprint_id: str, handler):
-    transport = httpx.MockTransport(handler)
-    scanner = Scanner(fingerprints=[fp(fingerprint_id)], transport=transport)
-    return run(scanner.scan_host("203.0.113.99", ports=[80]))
-
-
-def form_field(request: httpx.Request, field: str) -> str:
-    from urllib.parse import parse_qs
-
-    body = request.content.decode()
-    values = parse_qs(body).get(field, [])
-    return values[0] if values else ""
-
-
-def basic_creds(request: httpx.Request):
-    header = request.headers.get("authorization", "")
-    if not header.lower().startswith("basic "):
-        return None, None
-    raw = base64.b64decode(header.split(" ", 1)[1]).decode()
-    user, _, pw = raw.partition(":")
-    return user, pw
-
-
-def assert_flagged(findings, *, fingerprint_id: str, vendor: str, cred: Credential):
-    assert len(findings) == 1, f"expected exactly one finding, got {findings}"
-    finding = findings[0]
-    assert finding.fingerprint_id == fingerprint_id
-    assert finding.vendor == vendor
-    assert finding.default_creds is True
-    assert finding.matched_credential == cred
-    assert finding.evidence
+from hellhound.fingerprint import Credential
+from _fingerprint_helpers import (
+    BUNDLED,
+    assert_flagged,
+    basic_creds,
+    form_field,
+    fp,
+    scan_one,
+)
 
 
 # ---------------------------------------------------------------- fortinac
