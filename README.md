@@ -1,5 +1,9 @@
 # hellhound
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/bugsyhewitt/bugsyhewitt.github.io/main/public/cards/hellhound.jpg" alt="hellhound" width="680">
+</p>
+
 Linux-native IoT default-credential scanner with a maintained device-fingerprint
 database. hellhound scans a CIDR range or single host over HTTP/HTTPS, recognises
 known IoT device classes from their web surface, and checks whether each matched
