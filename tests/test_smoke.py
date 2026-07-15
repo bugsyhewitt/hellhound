@@ -16,7 +16,7 @@ from hellhound.scanner import Scanner
 
 
 def test_package_imports_with_version():
-    assert hellhound.__version__ == "0.1.0"
+    assert hellhound.__version__ == "1.0.0"
 
 
 def test_cli_parser_constructs():
