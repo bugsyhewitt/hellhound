@@ -58,7 +58,10 @@ class Finding:
 
     def to_dict(self) -> dict:
         cred = (
-            {"username": self.matched_credential.username, "password": self.matched_credential.password}
+            {
+                "username": self.matched_credential.username,
+                "password": self.matched_credential.password,
+            }
             if self.matched_credential
             else None
         )
@@ -372,7 +375,8 @@ class Scanner:
 
         if response.status_code not in auth.success_status:
             return False
-        if auth.failure_body_contains and auth.failure_body_contains.lower() in response.text.lower():
+        failure_body = auth.failure_body_contains
+        if failure_body and failure_body.lower() in response.text.lower():
             return False
         return True
 

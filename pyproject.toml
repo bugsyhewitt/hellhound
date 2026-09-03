@@ -42,3 +42,10 @@ markers = [
     "integration: live integration tests requiring Docker (deselect with '-m \"not integration\"')",
     "ship_gate: v1.0 release ship-gate marker (wheel-build + version-source-of-truth + CHANGELOG existence)",
 ]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
