@@ -5,6 +5,17 @@ All notable changes to hellhound are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-11-27
+
+### Added
+- 8 new device-class fingerprint entries: `cisco-ios-http`, `netgear-wnr-router`,
+  `tplink-wr-classic`, `synology-surveillance`, `zyxel-vmg-gateway`, `qnap-ts-nasui`,
+  `fortinet-fortiap`, `paloalto-panorama`
+- `scan_cidr_async()` and `probe_host_async()` async functions in `hellhound.scanner`
+  for CIDR-range sweeping with configurable concurrency (asyncio semaphore)
+- `hellhound scan-cidr --cidr <CIDR>` subcommand exposing the new async scan engine
+  via the CLI with `--ports`, `--max-concurrent`, `--timeout`, `--json` flags
+
 ## [1.0.0] - 2026-06-20
 
 ### Added

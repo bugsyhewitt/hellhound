@@ -4693,3 +4693,182 @@ fingerprints:
       username_field: username
       password_field: password
       failure_body_contains: "Invalid username or password"
+
+  # --- v0.2.0 expansion: 8 new device classes added for the expanded-fingerprint
+  # release, covering classic Cisco IOS HTTP, NETGEAR WNR consumer routers,
+  # TP-Link WR legacy web UI, Synology Surveillance Station, Zyxel VMG gateway,
+  # QNAP QTS newer web login, Fortinet FortiAP, and Palo Alto Panorama. All
+  # default credentials verified from vendor documentation. ---
+
+  - id: cisco-ios-http
+    vendor: Cisco
+    model_class: IOS HTTP Server (classic enterprise routers)
+    severity: high
+    description: >-
+      Classic Cisco IOS 12.x/15.x routers expose the built-in HTTP server on
+      port 80 for web-based device management. The IOS HTTP Server identifies
+      itself with "Cisco IOS Software" in the page body. Many deployments
+      retain the default enable-level credential admin/cisco or use a local
+      account that was never rotated.
+    match:
+      path: /
+      body_contains: "Cisco IOS Software"
+    default_credentials:
+      - {username: admin, password: cisco}
+      - {username: cisco, password: cisco}
+    auth:
+      type: basic
+      path: /level/15/exec/show/ver/cr
+
+  - id: netgear-wnr-router
+    vendor: NETGEAR
+    model_class: WNR/WGR consumer router (/index.htm)
+    severity: medium
+    description: >-
+      NETGEAR WNR and WGR consumer routers expose a web management UI whose
+      login form lives at /index.htm and whose default credential is
+      admin/password. These older models do not send a WWW-Authenticate header
+      (unlike the NETGEAR router entry that matches via Basic auth), so they
+      require a distinct match approach. Distinct from the bundled netgear-router
+      (WWW-Authenticate) and netgear-orbi (Orbi mesh) entries.
+    match:
+      path: /
+      body_contains: "NETGEAR"
+      http_title: NETGEAR
+    default_credentials:
+      - {username: admin, password: password}
+    auth:
+      type: form
+      path: /index.htm
+      username_field: admin_name
+      password_field: admin_pwd
+
+  - id: tplink-wr-classic
+    vendor: TP-Link
+    model_class: WR-series SOHO router (legacy web UI)
+    severity: medium
+    description: >-
+      TP-Link WR-series consumer routers (WR740N, WR841N, WR1043ND and similar)
+      expose a legacy web management UI whose login page is at
+      /userRpm/LoginRpm.htm. These models default to admin/admin. Distinct from
+      the bundled tplink-router entry (which authenticates to / via Basic auth)
+      and the tplink-archer entry (Archer C5400X CVE fingerprint).
+    match:
+      path: /
+      http_title: TP-LINK
+      body_contains: "LoginRpm"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /userRpm/LoginRpm.htm
+      username_field: Username
+      password_field: Password
+
+  - id: synology-surveillance
+    vendor: Synology
+    model_class: Surveillance Station web API
+    severity: high
+    description: >-
+      Synology Surveillance Station is an internet-facing IP camera management
+      web application bundled with Synology DiskStation NAS appliances. It
+      exposes its own login surface at /webapi/auth.cgi and defaults to the
+      same NAS admin account. Distinct from the bundled synology-dsm entry
+      which fingerprints the DSM dashboard; this entry fingerprints the
+      Surveillance Station package specifically.
+    match:
+      path: /
+      body_contains: "Surveillance Station"
+    default_credentials:
+      - {username: admin, password: admin}
+      - {username: admin, password: ""}
+    auth:
+      type: form
+      path: /webapi/auth.cgi
+      username_field: account
+      password_field: passwd
+
+  - id: zyxel-vmg-gateway
+    vendor: Zyxel
+    model_class: VMG series VDSL/fiber gateway
+    severity: medium
+    description: >-
+      Zyxel VMG-series residential VDSL and fiber gateways expose a web
+      management UI that identifies itself with the "VMG" model identifier in
+      the HTTP title. These devices default to admin/1234 on the web console,
+      the same as the SOHO zyxel-router entry, but are fingerprinted via the
+      VMG-specific title rather than the generic ZyXEL title. Supplements the
+      bundled zyxel-router, zyxel-firewall, and zyxel-nas entries.
+    match:
+      path: /
+      http_title: VMG
+    default_credentials:
+      - {username: admin, password: "1234"}
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /cgi-bin/login.cgi
+      username_field: username
+      password_field: password
+
+  - id: qnap-ts-nasui
+    vendor: QNAP
+    model_class: QTS NAS web login (QTS login page variant)
+    severity: high
+    description: >-
+      QNAP NAS appliances running QTS 5.x expose an updated web login page that
+      identifies itself with "QTS Login" in the page body. This is a companion
+      fingerprint to the bundled qnap-nas entry (which matches the older
+      "QNAP" body token and authenticates via authLogin.cgi with user/pwd
+      fields). QTS 5.x uses the username/password field names for the same
+      endpoint, making it a distinct match.
+    match:
+      path: /
+      body_contains: "QTS Login"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /cgi-bin/authLogin.cgi
+      username_field: username
+      password_field: password
+
+  - id: fortinet-fortiap
+    vendor: Fortinet
+    model_class: FortiAP wireless access point
+    severity: high
+    description: >-
+      Fortinet FortiAP wireless access points expose a lightweight web
+      management UI that identifies itself with "FortiAP" in the page body.
+      Out-of-the-box units ship with admin and a blank password on the
+      management interface. Distinct from the bundled fortinet-fortigate
+      (FortiOS firewall) and fortinet-fortimanager (management console) entries.
+    match:
+      path: /
+      body_contains: "FortiAP"
+    default_credentials:
+      - {username: admin, password: ""}
+    auth:
+      type: basic
+      path: /api/v2/cmdb/system/admin
+
+  - id: paloalto-panorama
+    vendor: Palo Alto Networks
+    model_class: Panorama network management console
+    severity: critical
+    description: >-
+      Palo Alto Networks Panorama is an internet-facing centralized network
+      management console for PAN-OS firewalls. It identifies itself with
+      "Panorama" in the page body and defaults to admin/admin on fresh
+      deployments. Supplements the bundled paloalto-globalprotect (GlobalProtect
+      portal CVE-2024-3400) and paloalto-expedition (migration tool) entries.
+    match:
+      path: /
+      body_contains: "Panorama"
+    default_credentials:
+      - {username: admin, password: admin}
+    auth:
+      type: form
+      path: /php/login.php
+      username_field: user
+      password_field: passwd
