@@ -429,3 +429,128 @@ class Scanner:
             wait = slot - now
         if wait > 0:
             await asyncio.sleep(wait)
+
+
+# ---------------------------------------------------------------------------
+# Standalone async helpers for CIDR range scanning (v0.2)
+# ---------------------------------------------------------------------------
+
+
+async def probe_host_async(
+    ip: str,
+    port: int,
+    timeout: int = 5,
+    *,
+    fingerprints: list[Fingerprint] | None = None,
+    transport: httpx.AsyncBaseTransport | None = None,
+) -> dict | None:
+    """Async TCP probe a single host:port and check for known device fingerprints.
+
+    Attempts an HTTP(S) GET to ``ip:port`` and matches the response against
+    the loaded fingerprint database.  Returns a dict of the form::
+
+        {"ip": str, "port": int, "device_type": str, "matched_fingerprint": str}
+
+    or ``None`` when the host is unreachable, the connection is refused, or no
+    fingerprint matches the response.
+
+    *fingerprints*, when provided, overrides the default fingerprint set loaded
+    from disk — useful in tests and when ``scan_cidr_async`` reuses a pre-loaded
+    set across all probes.
+
+    *transport* may be injected for testing (``httpx.MockTransport``); in
+    production the default transport performs real network requests.
+    """
+    if fingerprints is None:
+        from .fingerprint import load_fingerprint_set
+
+        fingerprints = load_fingerprint_set("default")
+
+    scheme = "https" if port in _TLS_PORTS else "http"
+    url = f"{scheme}://{ip}:{port}/"
+    kwargs: dict = {
+        "timeout": float(timeout),
+        "verify": False,
+        "follow_redirects": True,
+    }
+    if transport is not None:
+        kwargs["transport"] = transport
+
+    try:
+        async with httpx.AsyncClient(**kwargs) as client:
+            response = await client.get(url)
+    except httpx.HTTPError:
+        return None
+
+    body = response.text
+    title = extract_title(body)
+    headers = dict(response.headers)
+
+    for fp in fingerprints:
+        if fp.match.matches(
+            status=response.status_code,
+            title=title,
+            body=body,
+            headers=headers,
+        ):
+            return {
+                "ip": ip,
+                "port": port,
+                "device_type": fp.vendor,
+                "matched_fingerprint": fp.id,
+            }
+    return None
+
+
+async def scan_cidr_async(
+    cidr: str,
+    ports: list[int] | None = None,
+    max_concurrent: int = 50,
+    timeout: int = 5,
+    *,
+    fingerprints: list[Fingerprint] | None = None,
+    transport: httpx.AsyncBaseTransport | None = None,
+) -> list[dict]:
+    """Async scan every usable host in a CIDR range for known device fingerprints.
+
+    Expands *cidr* to its usable host addresses (e.g. a /30 yields 2 hosts),
+    then probes each host across *ports* (default: 80, 443, 8080, 8443) using
+    :func:`probe_host_async`, limiting concurrency to *max_concurrent* via an
+    ``asyncio.Semaphore``.
+
+    Returns a list of match dicts (same shape as :func:`probe_host_async`) for
+    every host/port pair where a fingerprint matched.  Unreachable hosts and
+    unmatched responses are silently excluded.
+
+    *fingerprints* and *transport* are forwarded to :func:`probe_host_async`
+    unchanged (useful for testing or reusing a pre-loaded fingerprint set).
+    """
+    if ports is None:
+        ports = [80, 443, 8080, 8443]
+
+    network = ipaddress.ip_network(cidr, strict=False)
+    hosts = [str(h) for h in network.hosts()]
+
+    if fingerprints is None:
+        from .fingerprint import load_fingerprint_set
+
+        fingerprints = load_fingerprint_set("default")
+
+    semaphore = asyncio.Semaphore(max_concurrent)
+    results: list[dict] = []
+
+    async def _probe(ip: str, port: int) -> None:
+        async with semaphore:
+            match = await probe_host_async(
+                ip,
+                port,
+                timeout,
+                fingerprints=fingerprints,
+                transport=transport,
+            )
+        if match is not None:
+            results.append(match)
+
+    tasks = [_probe(ip, port) for ip in hosts for port in ports]
+    await asyncio.gather(*tasks)
+    return results

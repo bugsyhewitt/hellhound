@@ -22,7 +22,7 @@ from .fingerprint import (
     load_fingerprint_set_with_dir,
     validate_fingerprints,
 )
-from .scanner import Finding, Scanner, ScanProgress
+from .scanner import Finding, Scanner, ScanProgress, scan_cidr_async
 
 DEFAULT_PORTS = "80,443,8080,8443"
 
@@ -600,7 +600,98 @@ def resolve_exit_code(findings: list[Finding], exit_code_when_found: int) -> int
     return 0
 
 
+def _main_scan_cidr(argv: list[str]) -> int:
+    """Entry point for ``hellhound scan-cidr ...``."""
+    parser = build_scan_cidr_parser()
+    args = parser.parse_args(argv)
+
+    try:
+        ports = parse_ports(args.ports)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+    try:
+        results = asyncio.run(
+            scan_cidr_async(
+                args.cidr,
+                ports=ports,
+                max_concurrent=args.max_concurrent,
+                timeout=int(args.timeout),
+            )
+        )
+    except ValueError as exc:
+        print(f"error: invalid CIDR: {exc}", file=sys.stderr)
+        return 2
+
+    if args.json:
+        import json
+
+        print(json.dumps(results, indent=2))
+    else:
+        if not results:
+            print(f"hellhound scan-cidr: no matches found in {args.cidr}")
+        else:
+            print(f"hellhound scan-cidr: {len(results)} match(es) in {args.cidr}")
+            for r in results:
+                print(
+                    f"  {r['ip']}:{r['port']}  {r['device_type']}  ({r['matched_fingerprint']})"
+                )
+    return 0
+
+
+def build_scan_cidr_parser() -> argparse.ArgumentParser:
+    """Parser for the ``scan-cidr`` subcommand."""
+    parser = argparse.ArgumentParser(
+        prog="hellhound scan-cidr",
+        description=(
+            "Async scan a CIDR range for devices matching known fingerprints "
+            "(detection-only). Uses asyncio with configurable concurrency."
+        ),
+        epilog="Use only against systems you are explicitly authorised to test.",
+    )
+    parser.add_argument(
+        "--cidr",
+        required=True,
+        metavar="CIDR",
+        help="CIDR range to scan (e.g. 192.168.1.0/24).",
+    )
+    parser.add_argument(
+        "--ports",
+        default="80,443,8080,8443",
+        metavar="LIST",
+        help="Comma-separated ports to probe (default: 80,443,8080,8443).",
+    )
+    parser.add_argument(
+        "--max-concurrent",
+        type=int,
+        default=50,
+        metavar="N",
+        help="Maximum concurrent probes (default: 50).",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=float,
+        default=5.0,
+        metavar="SECONDS",
+        help="Per-probe timeout in seconds (default: 5.0).",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        default=False,
+        help="Emit results as a JSON array (default: human-readable text).",
+    )
+    return parser
+
+
 def main(argv: list[str] | None = None) -> int:
+    # Route the scan-cidr subcommand before the main parser touches argv so
+    # that the existing flat interface (--target, --ports, etc.) is unchanged.
+    effective_argv = list(argv) if argv is not None else sys.argv[1:]
+    if effective_argv and effective_argv[0] == "scan-cidr":
+        return _main_scan_cidr(effective_argv[1:])
+
     parser = build_parser()
     args = parser.parse_args(argv)
 

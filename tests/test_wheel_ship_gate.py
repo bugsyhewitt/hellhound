@@ -52,8 +52,8 @@ def wheel_artifacts(tmp_path_factory):
         [sys.executable, "-m", "build", "--wheel", "--sdist", "--outdir", str(out)],
         cwd=str(REPO_ROOT),
     )
-    wheels = list(out.glob("hellhound-1.0.0-*.whl"))
-    sdists = list(out.glob("hellhound-1.0.0.tar.gz"))
+    wheels = list(out.glob("hellhound-1.1.0-*.whl"))
+    sdists = list(out.glob("hellhound-1.1.0.tar.gz"))
     assert wheels, f"wheel not built; got: {sorted(p.name for p in out.iterdir())}"
     assert sdists, f"sdist not built; got: {sorted(p.name for p in out.iterdir())}"
     return wheels[0], sdists[0]
@@ -88,8 +88,8 @@ def test_wheel_builds_cleanly(wheel_artifacts):
     wheel_path, sdist_path = wheel_artifacts
     assert wheel_path.exists(), f"wheel missing: {wheel_path}"
     assert sdist_path.exists(), f"sdist missing: {sdist_path}"
-    assert wheel_path.name.startswith("hellhound-1.0.0-")
-    assert sdist_path.name == "hellhound-1.0.0.tar.gz"
+    assert wheel_path.name.startswith("hellhound-1.1.0-")
+    assert sdist_path.name == "hellhound-1.1.0.tar.gz"
 
 
 @pytest.mark.ship_gate
@@ -102,8 +102,8 @@ def test_wheel_installs_and_version(fresh_venv_dir):
         text=True,
         check=True,
     )
-    assert result.stdout.strip() == "hellhound 1.0.0", (
-        f"expected 'hellhound 1.0.0', got: {result.stdout!r}"
+    assert result.stdout.strip() == "hellhound 1.1.0", (
+        f"expected 'hellhound 1.1.0', got: {result.stdout!r}"
     )
 
 
@@ -112,7 +112,7 @@ def test_wheel_version_importable_in_fresh_venv(fresh_venv_dir):
     """`import hellhound` in fresh venv MUST yield __version__ == '1.0.0'."""
     bin_dir = fresh_venv_dir / "bin"
     result = subprocess.run(
-        [str(bin_dir / "python"), "-c", "import hellhound; assert hellhound.__version__ == '1.0.0'"],
+        [str(bin_dir / "python"), "-c", "import hellhound; assert hellhound.__version__ == '1.1.0'"],
         capture_output=True,
         text=True,
         check=True,
